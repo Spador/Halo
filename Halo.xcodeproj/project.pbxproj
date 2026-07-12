@@ -273,7 +273,6 @@
 				DEVELOPMENT_TEAM = 4A5QAZXL3L;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Halo shows your upcoming calendar events in the notch. Events never leave this Mac.";
@@ -306,7 +305,6 @@
 				DEVELOPMENT_TEAM = 4A5QAZXL3L;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Halo shows your upcoming calendar events in the notch. Events never leave this Mac.";

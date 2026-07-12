@@ -65,12 +65,12 @@ final class HUDCoordinator: NSObject {
             // Can't control the display the pointer is on? Pass the key to
             // the system (checked on down AND up so both are consistent).
             guard brightness.canControlDisplayUnderPointer() else {
-                Logger.hud.notice("brightness key: cannot control display under pointer; passing to system")
+                Logger.hud.debug("brightness key: cannot control display under pointer; passing to system")
                 return false
             }
             if isKeyDown {
                 let level = brightness.stepBrightness(up: key == .brightnessUp)
-                Logger.hud.notice("brightness key handled; new level: \(level.map { "\($0)" } ?? "nil")")
+                Logger.hud.debug("brightness key handled; new level: \(level.map { "\($0)" } ?? "nil")")
                 if let level {
                     showHUD(HUDState(kind: .brightness, level: level))
                 }
@@ -87,7 +87,7 @@ final class HUDCoordinator: NSObject {
                     // Monitor speakers over DisplayPort/HDMI: only DDC works.
                     showHUD(HUDState(kind: .volume, level: level))
                 } else {
-                    Logger.hud.notice("volume key: output not controllable, no DDC audio; passing to system")
+                    Logger.hud.debug("volume key: output not controllable, no DDC audio; passing to system")
                     return false
                 }
             }

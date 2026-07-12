@@ -56,16 +56,16 @@ final class DisplayBrightnessManager: NSObject {
         let display = Self.displayUnderPointer()
 
         if CGDisplayIsBuiltin(display) != 0 {
-            Logger.hud.notice("step: builtin display \(display), available: \(self.builtin.isAvailable)")
+            Logger.hud.debug("step: builtin display \(display), available: \(self.builtin.isAvailable)")
             return builtin.stepBrightness(up: up)
         }
 
         guard Self.externalBrightnessEnabled,
               let service = externalServices[display] else {
-            Logger.hud.notice("step: external display \(display) brightness disabled or unpaired")
+            Logger.hud.debug("step: external display \(display) brightness disabled or unpaired")
             return nil
         }
-        Logger.hud.notice("step: external display \(display) via DDC")
+        Logger.hud.debug("step: external display \(display) via DDC")
         let current = externalLevels[display] ?? 0.5
         let stepped = current + (up ? Self.step : -Self.step)
         let snapped = (stepped * 16).rounded() / 16
@@ -103,7 +103,7 @@ final class DisplayBrightnessManager: NSObject {
         let clamped = min(max(snapped, 0), 1)
         ddc.write(.audioVolume, value: UInt16(clamped * 100), to: service)
         externalAudioLevels[display] = clamped
-        Logger.hud.notice("external audio volume via DDC: \(clamped)")
+        Logger.hud.debug("external audio volume via DDC: \(clamped)")
         return clamped
     }
 
@@ -116,7 +116,7 @@ final class DisplayBrightnessManager: NSObject {
         } else {
             externalAudioMuted.remove(display)
         }
-        Logger.hud.notice("external audio mute via DDC: \(nowMuted)")
+        Logger.hud.debug("external audio mute via DDC: \(nowMuted)")
         return HUDState(
             kind: .volume,
             level: externalAudioLevels[display] ?? 0.25,
