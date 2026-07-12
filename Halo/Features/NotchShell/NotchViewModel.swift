@@ -1,6 +1,13 @@
 import Observation
 import CoreGraphics
 
+/// The cards that can occupy the expanded notch. Each feature module
+/// contributes one; the shell decides which is visible.
+enum NotchCard {
+    case nowPlaying
+    case shelf
+}
+
 /// State shared between the panel controller (AppKit side) and the SwiftUI
 /// views rendered inside the panel.
 @Observable
@@ -8,6 +15,14 @@ final class NotchViewModel {
     /// Whether the overlay is open. The controller flips this from hover
     /// events; the SwiftUI shape animates whenever it changes.
     var isExpanded = false
+
+    /// The card the user explicitly picked with the switcher, if any.
+    /// `nil` means "automatic": the shell picks based on what has content.
+    var selectedCard: NotchCard?
+
+    /// True while a file drag hovers over the panel; forces the shelf card
+    /// and its highlight.
+    var isDropTargeted = false
 
     /// Size of the physical notch, so the collapsed shape matches it
     /// exactly. Updated by the controller when screens change.

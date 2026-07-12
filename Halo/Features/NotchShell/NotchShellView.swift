@@ -5,6 +5,7 @@ import SwiftUI
 struct NotchShellView: View {
     let viewModel: NotchViewModel
     let nowPlaying: NowPlayingViewModel
+    let shelf: ShelfViewModel
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -38,17 +39,65 @@ struct NotchShellView: View {
                     .transition(.opacity)
             }
         }
+        .overlay(alignment: .topTrailing) { cardSwitcher }
     }
 
-    /// Chooses what fills the open notch: the media card when something is
-    /// playing, otherwise the idle placeholder. Later phases add more cards.
+    /// Which card the open notch shows. A hovering file drag always forces
+    /// the shelf; an explicit switcher choice is honored while that card
+    /// still has content; otherwise: shelf if it holds files, then media,
+    /// then the idle placeholder.
+    private var activeCard: NotchCard? {
+        if viewModel.isDropTargeted { return .shelf }
+        switch viewModel.selectedCard {
+        case .shelf where shelf.hasItems: return .shelf
+        case .nowPlaying where nowPlaying.info != nil: return .nowPlaying
+        default: break
+        }
+        if shelf.hasItems { return .shelf }
+        if nowPlaying.info != nil { return .nowPlaying }
+        return nil
+    }
+
     @ViewBuilder
     private var expandedContent: some View {
-        if let info = nowPlaying.info {
-            NowPlayingView(viewModel: nowPlaying, info: info)
-        } else {
+        switch activeCard {
+        case .shelf:
+            ShelfView(viewModel: shelf, isDropTargeted: viewModel.isDropTargeted)
+        case .nowPlaying:
+            if let info = nowPlaying.info {
+                NowPlayingView(viewModel: nowPlaying, info: info)
+            }
+        case nil:
             placeholder
         }
+    }
+
+    /// Tiny switcher in the top-right strip beside the notch, shown only
+    /// when both cards have content to switch between.
+    @ViewBuilder
+    private var cardSwitcher: some View {
+        if viewModel.isExpanded, shelf.hasItems, nowPlaying.info != nil {
+            HStack(spacing: 5) {
+                cardButton(.nowPlaying, symbol: "music.note")
+                cardButton(.shelf, symbol: "tray.fill")
+            }
+            .padding(.top, 7)
+            .padding(.trailing, 14)
+            .transition(.opacity)
+        }
+    }
+
+    private func cardButton(_ card: NotchCard, symbol: String) -> some View {
+        Button {
+            viewModel.selectedCard = card
+        } label: {
+            Image(systemName: symbol)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.white.opacity(activeCard == card ? 0.95 : 0.4))
+                .frame(width: 22, height: 18)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private var placeholder: some View {

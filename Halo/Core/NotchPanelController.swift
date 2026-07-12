@@ -9,6 +9,7 @@ import SwiftUI
 final class NotchPanelController: NSObject {
     private let panel: NotchPanel
     private let viewModel = NotchViewModel()
+    private let shelf: ShelfViewModel
     private var geometry: NotchGeometry
     private var collapseTask: Task<Void, Never>?
     private var shrinkTask: Task<Void, Never>?
@@ -19,16 +20,17 @@ final class NotchPanelController: NSObject {
     /// How long the collapse spring runs before the window shrinks under it.
     private static let shrinkDelay: Duration = .milliseconds(450)
 
-    init(screen: NSScreen, nowPlaying: NowPlayingViewModel) {
+    init(screen: NSScreen, nowPlaying: NowPlayingViewModel, shelf: ShelfViewModel) {
         geometry = NotchGeometry(screen: screen)
         panel = NotchPanel(contentRect: geometry.notchRect)
+        self.shelf = shelf
         super.init()
 
         viewModel.notchSize = geometry.notchRect.size
 
         let hoverView = HoverTrackingView()
         let hostingView = NSHostingView(
-            rootView: NotchShellView(viewModel: viewModel, nowPlaying: nowPlaying)
+            rootView: NotchShellView(viewModel: viewModel, nowPlaying: nowPlaying, shelf: shelf)
         )
         // Don't let SwiftUI dictate the window size — the controller owns it.
         hostingView.sizingOptions = []
@@ -39,6 +41,9 @@ final class NotchPanelController: NSObject {
 
         hoverView.onPointerEntered = { [weak self] in self?.expand() }
         hoverView.onPointerExited = { [weak self] in self?.scheduleCollapse() }
+        hoverView.onDragEntered = { [weak self] in self?.dragDidEnter() }
+        hoverView.onDragExited = { [weak self] in self?.dragDidExit() }
+        hoverView.onDropped = { [weak self] urls in self?.handleDrop(urls) }
 
         NotificationCenter.default.addObserver(
             self,
@@ -84,6 +89,25 @@ final class NotchPanelController: NSObject {
             guard !Task.isCancelled, let self, !self.viewModel.isExpanded else { return }
             self.panel.setFrame(self.geometry.notchRect, display: true)
         }
+    }
+
+    // MARK: - File drags
+
+    private func dragDidEnter() {
+        viewModel.isDropTargeted = true
+        expand()
+    }
+
+    private func dragDidExit() {
+        viewModel.isDropTargeted = false
+        scheduleCollapse()
+    }
+
+    private func handleDrop(_ urls: [URL]) {
+        viewModel.isDropTargeted = false
+        shelf.add(urls)
+        // Show the result of the drop even if another card was selected.
+        viewModel.selectedCard = .shelf
     }
 
     /// Recomputes position when displays are plugged in/out, resolution
