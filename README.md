@@ -61,8 +61,11 @@ The app is **not sandboxed**: spawning the media helper and the interfaces above
 **Homebrew:**
 
 ```sh
-brew install --cask --no-quarantine spador/halo/halo
+brew install --cask spador/halo/halo
+xattr -dr com.apple.quarantine /Applications/Halo.app
 ```
+
+(The second line clears Gatekeeper's download quarantine — needed because this personal build isn't notarized by Apple.)
 
 **Manual:** download `Halo-<version>.zip` from [Releases](https://github.com/Spador/Halo/releases), unzip, drag `Halo.app` into Applications, then clear the download quarantine once (Halo is a personal open-source build, not notarized by Apple):
 
