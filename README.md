@@ -9,7 +9,7 @@ Halo lives in and around the MacBook notch. Hover over it and it expands into a 
 ## Planned features (v1)
 
 - [x] Notch overlay that expands on hover with Dynamic Island–style animations
-- [ ] Now Playing: album art, track info, play/pause/skip from the notch
+- [x] Now Playing: album art, track info, play/pause/skip from the notch — works with any media source (Apple Music, Spotify, browser tabs)
 - [ ] File shelf: drag files onto the notch to hold them, drag out or AirDrop them
 - [ ] Custom volume & brightness HUDs replacing the system pop-ups
 - [ ] System stats: CPU / GPU / RAM / network, battery & charging, AirPods battery
@@ -18,7 +18,7 @@ Halo lives in and around the MacBook notch. Hover over it and it expands into a 
 ## Principles
 
 - **Native & minimal** — Swift 6 + SwiftUI (AppKit where the overlay needs it). No Electron, no web views.
-- **Zero third-party dependencies** — Apple frameworks only.
+- **Zero third-party dependencies** — Apple frameworks only, with one audited, vendored exception for Now Playing data (see `Vendor/README.md`).
 - **Lightweight** — idle CPU ≈ 0%, small memory footprint; event-driven, not polling.
 - **Private by design** — no telemetry, no crash reporters, no network calls. Permissions are requested only when a feature needs them, and each one is documented.
 

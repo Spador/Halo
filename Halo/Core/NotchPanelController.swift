@@ -19,7 +19,7 @@ final class NotchPanelController: NSObject {
     /// How long the collapse spring runs before the window shrinks under it.
     private static let shrinkDelay: Duration = .milliseconds(450)
 
-    init(screen: NSScreen) {
+    init(screen: NSScreen, nowPlaying: NowPlayingViewModel) {
         geometry = NotchGeometry(screen: screen)
         panel = NotchPanel(contentRect: geometry.notchRect)
         super.init()
@@ -27,7 +27,9 @@ final class NotchPanelController: NSObject {
         viewModel.notchSize = geometry.notchRect.size
 
         let hoverView = HoverTrackingView()
-        let hostingView = NSHostingView(rootView: NotchShellView(viewModel: viewModel))
+        let hostingView = NSHostingView(
+            rootView: NotchShellView(viewModel: viewModel, nowPlaying: nowPlaying)
+        )
         // Don't let SwiftUI dictate the window size — the controller owns it.
         hostingView.sizingOptions = []
         hoverView.addSubview(hostingView)
