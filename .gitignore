@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Xcode user state (window layout, open tabs, breakpoints — personal, not project)
+xcuserdata/
+*.xcuserstate
+
+# Build products and intermediates
+build/
+DerivedData/
+
+# Swift Package Manager (if we ever resolve packages locally)
+.swiftpm/
+Package.resolved
