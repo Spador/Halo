@@ -56,6 +56,22 @@ The app is **not sandboxed**: spawning the media helper and the interfaces above
 - macOS 14 Sonoma or later
 - Xcode 16+ to build from source
 
+## Install (no Xcode needed)
+
+**Homebrew:**
+
+```sh
+brew install --cask --no-quarantine spador/halo/halo
+```
+
+**Manual:** download `Halo-<version>.zip` from [Releases](https://github.com/Spador/Halo/releases), unzip, drag `Halo.app` into Applications, then clear the download quarantine once (Halo is a personal open-source build, not notarized by Apple):
+
+```sh
+xattr -d com.apple.quarantine /Applications/Halo.app
+```
+
+On first launch, grant **Accessibility** when prompted — that powers the volume/brightness HUD. Calendar access is only requested if you use the calendar page.
+
 ## Build from source
 
 1. Clone the repo and open `Halo.xcodeproj` in Xcode.
