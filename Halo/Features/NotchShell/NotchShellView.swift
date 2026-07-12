@@ -13,23 +13,44 @@ struct NotchShellView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .animation(.spring(response: 0.38, dampingFraction: 0.8), value: viewModel.isExpanded)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: viewModel.hud)
+    }
+
+    /// The island has three sizes: the exact notch (idle), notch plus slim
+    /// wings (HUD flashing), and the full panel (hovered open).
+    private var shapeSize: CGSize {
+        if viewModel.isExpanded { return NotchViewModel.expandedSize }
+        if viewModel.hud != nil {
+            return CGSize(
+                width: viewModel.notchSize.width + 2 * NotchViewModel.hudWingWidth,
+                height: viewModel.notchSize.height + NotchViewModel.hudExtraHeight
+            )
+        }
+        return viewModel.notchSize
     }
 
     private var notchShape: some View {
         let expanded = viewModel.isExpanded
-        let size = expanded ? NotchViewModel.expandedSize : viewModel.notchSize
+        let showingHUD = !expanded && viewModel.hud != nil
+        let size = shapeSize
 
         return UnevenRoundedRectangle(
             cornerRadii: .init(
-                topLeading: expanded ? 12 : 0,
-                bottomLeading: expanded ? 24 : 9,
-                bottomTrailing: expanded ? 24 : 9,
-                topTrailing: expanded ? 12 : 0
+                topLeading: expanded ? 12 : showingHUD ? 8 : 0,
+                bottomLeading: expanded ? 24 : showingHUD ? 14 : 9,
+                bottomTrailing: expanded ? 24 : showingHUD ? 14 : 9,
+                topTrailing: expanded ? 12 : showingHUD ? 8 : 0
             ),
             style: .continuous
         )
         .fill(.black)
         .frame(width: size.width, height: size.height)
+        .overlay(alignment: .top) {
+            if let hud = viewModel.hud, !expanded {
+                HUDView(state: hud, notchSize: viewModel.notchSize)
+                    .transition(.opacity)
+            }
+        }
         .overlay(alignment: .top) {
             if expanded {
                 expandedContent

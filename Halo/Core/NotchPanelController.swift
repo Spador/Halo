@@ -13,12 +13,15 @@ final class NotchPanelController: NSObject {
     private var geometry: NotchGeometry
     private var collapseTask: Task<Void, Never>?
     private var shrinkTask: Task<Void, Never>?
+    private var hudHideTask: Task<Void, Never>?
 
     /// Grace period after the pointer leaves before collapsing, so grazing
     /// the edge doesn't make the overlay flicker.
     private static let collapseGracePeriod: Duration = .milliseconds(120)
     /// How long the collapse spring runs before the window shrinks under it.
     private static let shrinkDelay: Duration = .milliseconds(450)
+    /// How long a volume/brightness flash stays before auto-hiding.
+    private static let hudDisplayDuration: Duration = .milliseconds(1500)
 
     init(screen: NSScreen, nowPlaying: NowPlayingViewModel, shelf: ShelfViewModel) {
         geometry = NotchGeometry(screen: screen)
@@ -83,12 +86,57 @@ final class NotchPanelController: NSObject {
         viewModel.isExpanded = false
         // Shrink the window only after the spring has visually finished;
         // shrinking immediately would clip the animation mid-flight.
+        scheduleShrinkToRestFrame()
+    }
+
+    /// The window size when not expanded: notch-sized normally, wing-sized
+    /// while a HUD flash is still showing.
+    private var restFrame: CGRect {
+        viewModel.hud != nil ? hudFrame : geometry.notchRect
+    }
+
+    private func scheduleShrinkToRestFrame() {
         shrinkTask?.cancel()
         shrinkTask = Task { [weak self] in
             try? await Task.sleep(for: Self.shrinkDelay)
             guard !Task.isCancelled, let self, !self.viewModel.isExpanded else { return }
-            self.panel.setFrame(self.geometry.notchRect, display: true)
+            self.panel.setFrame(self.restFrame, display: true)
         }
+    }
+
+    // MARK: - Volume/brightness HUD
+
+    func showHUD(_ state: HUDState) {
+        if !viewModel.isExpanded {
+            shrinkTask?.cancel()
+            panel.setFrame(hudFrame, display: true)
+        }
+        viewModel.hud = state
+
+        hudHideTask?.cancel()
+        hudHideTask = Task { [weak self] in
+            try? await Task.sleep(for: Self.hudDisplayDuration)
+            guard !Task.isCancelled else { return }
+            self?.hideHUD()
+        }
+    }
+
+    private func hideHUD() {
+        viewModel.hud = nil
+        guard !viewModel.isExpanded else { return }
+        scheduleShrinkToRestFrame()
+    }
+
+    private var hudFrame: CGRect {
+        let notch = geometry.notchRect
+        let width = notch.width + 2 * NotchViewModel.hudWingWidth
+        let height = notch.height + NotchViewModel.hudExtraHeight
+        return CGRect(
+            x: notch.midX - width / 2,
+            y: notch.maxY - height,
+            width: width,
+            height: height
+        )
     }
 
     // MARK: - File drags
@@ -117,6 +165,7 @@ final class NotchPanelController: NSObject {
         geometry = NotchGeometry(screen: screen)
         viewModel.notchSize = geometry.notchRect.size
         viewModel.isExpanded = false
+        viewModel.hud = nil
         panel.setFrame(geometry.notchRect, display: true)
     }
 

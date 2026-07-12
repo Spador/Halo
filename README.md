@@ -11,7 +11,7 @@ Halo lives in and around the MacBook notch. Hover over it and it expands into a 
 - [x] Notch overlay that expands on hover with Dynamic Island–style animations
 - [x] Now Playing: album art, track info, play/pause/skip from the notch — works with any media source (Apple Music, Spotify, browser tabs)
 - [x] File shelf: drag files onto the notch to hold them, drag out or AirDrop them; pin items to keep them across restarts
-- [ ] Custom volume & brightness HUDs replacing the system pop-ups
+- [x] Custom volume & brightness HUDs replacing the system pop-ups, including monitor-speaker volume over DDC (DisplayPort/HDMI audio, which macOS itself can't control)
 - [ ] System stats: CPU / GPU / RAM / network, battery & charging, AirPods battery
 - [ ] Calendar glance, quick timers, and a Pomodoro timer as notch live activities
 
@@ -21,6 +21,11 @@ Halo lives in and around the MacBook notch. Hover over it and it expands into a 
 - **Zero third-party dependencies** — Apple frameworks only, with one audited, vendored exception for Now Playing data (see `Vendor/README.md`).
 - **Lightweight** — idle CPU ≈ 0%, small memory footprint; event-driven, not polling.
 - **Private by design** — no telemetry, no crash reporters, no network calls. Permissions are requested only when a feature needs them, and each one is documented.
+
+## Known limitations
+
+- External-monitor **brightness** via DDC is implemented but currently disabled (`DisplayBrightnessManager.externalBrightnessEnabled`): the LG panel it was tested against accepts DDC audio commands but ignores DDC brightness writes. Monitor-speaker **volume** via DDC works.
+- The HUD feature needs the **Accessibility** permission (event tap for media keys only — see `MediaKeyTap.swift` for the filter). Quit Halo and the keys instantly revert to stock macOS behavior.
 
 ## Requirements
 

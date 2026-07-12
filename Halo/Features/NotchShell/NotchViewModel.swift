@@ -24,6 +24,10 @@ final class NotchViewModel {
     /// and its highlight.
     var isDropTargeted = false
 
+    /// Volume/brightness HUD currently flashing in the notch wings, if any.
+    /// Set by the panel controller, cleared by its auto-hide timer.
+    var hud: HUDState?
+
     /// Size of the physical notch, so the collapsed shape matches it
     /// exactly. Updated by the controller when screens change.
     var notchSize = CGSize(width: 200, height: 32)
@@ -32,4 +36,9 @@ final class NotchViewModel {
     /// shape and the window-frame math in the controller, so the two can
     /// never disagree.
     static let expandedSize = CGSize(width: 440, height: 175)
+
+    /// Width of each HUD "wing" flanking the notch, and the extra height
+    /// below it — again shared between shape and window-frame math.
+    static let hudWingWidth: CGFloat = 90
+    static let hudExtraHeight: CGFloat = 10
 }

@@ -16,6 +16,12 @@ final class NowPlayingViewModel {
         service.start()
     }
 
+    /// Called when the app quits so the perl helper dies immediately
+    /// instead of lingering until its next write fails.
+    func shutdown() {
+        service.stop()
+    }
+
     func togglePlayPause() {
         service.send(.togglePlayPause)
         // Flip optimistically so the button reacts instantly; the stream
