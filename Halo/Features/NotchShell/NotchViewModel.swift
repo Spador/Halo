@@ -6,7 +6,19 @@ import CoreGraphics
 enum NotchCard {
     case nowPlaying
     case shelf
+    case calendar
+    case timer
+    case pomodoro
     case stats
+}
+
+/// A persistent mini-display in the collapsed notch's wings (unlike the
+/// HUD, which auto-hides): a running timer, a Pomodoro phase, etc.
+struct LiveActivity: Equatable {
+    var iconName: String
+    var text: String
+    /// Emphasized activities render green (Pomodoro breaks, completion).
+    var emphasized: Bool
 }
 
 /// State shared between the panel controller (AppKit side) and the SwiftUI
@@ -29,6 +41,10 @@ final class NotchViewModel {
     /// Set by the panel controller, cleared by its auto-hide timer.
     var hud: HUDState?
 
+    /// Persistent wing display (running timer). Outlives HUD flashes; a
+    /// HUD briefly covers it, then it returns.
+    var liveActivity: LiveActivity?
+
     /// Size of the physical notch, so the collapsed shape matches it
     /// exactly. Updated by the controller when screens change.
     var notchSize = CGSize(width: 200, height: 32)
@@ -36,7 +52,7 @@ final class NotchViewModel {
     /// Size of the opened overlay — one constant shared by the SwiftUI
     /// shape and the window-frame math in the controller, so the two can
     /// never disagree.
-    static let expandedSize = CGSize(width: 440, height: 175)
+    static let expandedSize = CGSize(width: 500, height: 250)
 
     /// Width of each HUD "wing" flanking the notch, and the extra height
     /// below it — again shared between shape and window-frame math.

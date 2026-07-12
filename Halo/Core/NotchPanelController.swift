@@ -27,7 +27,10 @@ final class NotchPanelController: NSObject {
         screen: NSScreen,
         nowPlaying: NowPlayingViewModel,
         shelf: ShelfViewModel,
-        stats: StatsViewModel
+        stats: StatsViewModel,
+        calendar: CalendarService,
+        quickTimer: QuickTimerEngine,
+        pomodoro: PomodoroEngine
     ) {
         geometry = NotchGeometry(screen: screen)
         panel = NotchPanel(contentRect: geometry.notchRect)
@@ -42,7 +45,10 @@ final class NotchPanelController: NSObject {
                 viewModel: viewModel,
                 nowPlaying: nowPlaying,
                 shelf: shelf,
-                stats: stats
+                stats: stats,
+                calendar: calendar,
+                quickTimer: quickTimer,
+                pomodoro: pomodoro
             )
         )
         // Don't let SwiftUI dictate the window size — the controller owns it.
@@ -100,9 +106,32 @@ final class NotchPanelController: NSObject {
     }
 
     /// The window size when not expanded: notch-sized normally, wing-sized
-    /// while a HUD flash is still showing.
+    /// while a HUD flash or live activity is showing.
     private var restFrame: CGRect {
-        viewModel.hud != nil ? hudFrame : geometry.notchRect
+        viewModel.hud != nil || viewModel.liveActivity != nil
+            ? hudFrame
+            : geometry.notchRect
+    }
+
+    // MARK: - Live activity (running timer in the wings)
+
+    /// Updates the persistent wing display. The window only re-frames when
+    /// the activity appears or disappears — per-second text updates reuse
+    /// the existing frame.
+    func setLiveActivity(_ activity: LiveActivity?) {
+        let hadWings = viewModel.liveActivity != nil
+        viewModel.liveActivity = activity
+        let hasWings = activity != nil
+        guard hadWings != hasWings,
+              !viewModel.isExpanded,
+              viewModel.hud == nil
+        else { return }
+        if hasWings {
+            shrinkTask?.cancel()
+            panel.setFrame(hudFrame, display: true)
+        } else {
+            scheduleShrinkToRestFrame()
+        }
     }
 
     private func scheduleShrinkToRestFrame() {

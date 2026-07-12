@@ -7,6 +7,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var hud: HUDCoordinator?
 
     private var stats: StatsViewModel?
+    private var calendar: CalendarService?
+    private var quickTimer: QuickTimerEngine?
+    private var pomodoro: PomodoroEngine?
+    /// Latest live activity from each engine, merged for the wings.
+    private var timerActivity: LiveActivity?
+    private var pomodoroActivity: LiveActivity?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard let screen = NotchGeometry.preferredScreen() else { return }
@@ -14,13 +20,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let shelf = ShelfViewModel()
         let battery = BatteryMonitor()
         let stats = StatsViewModel(battery: battery)
+        let calendar = CalendarService()
+        let quickTimer = QuickTimerEngine()
+        let pomodoro = PomodoroEngine()
         let controller = NotchPanelController(
             screen: screen,
             nowPlaying: nowPlaying,
             shelf: shelf,
-            stats: stats
+            stats: stats,
+            calendar: calendar,
+            quickTimer: quickTimer,
+            pomodoro: pomodoro
         )
         controller.show()
+
+        // Both engines can run at once; the wings show the quick timer
+        // when both are active (it's usually the shorter, more urgent one).
+        quickTimer.onLiveActivityChanged = { [weak self, weak controller] activity in
+            guard let self else { return }
+            self.timerActivity = activity
+            controller?.setLiveActivity(self.timerActivity ?? self.pomodoroActivity)
+        }
+        pomodoro.onLiveActivityChanged = { [weak self, weak controller] activity in
+            guard let self else { return }
+            self.pomodoroActivity = activity
+            controller?.setLiveActivity(self.timerActivity ?? self.pomodoroActivity)
+        }
 
         let hud = HUDCoordinator { [weak controller] state in
             controller?.showHUD(state)
@@ -38,6 +63,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.shelf = shelf
         self.hud = hud
         self.stats = stats
+        self.calendar = calendar
+        self.quickTimer = quickTimer
+        self.pomodoro = pomodoro
         notchController = controller
     }
 

@@ -13,7 +13,7 @@ Halo lives in and around the MacBook notch. Hover over it and it expands into a 
 - [x] File shelf: drag files onto the notch to hold them, drag out or AirDrop them; pin items to keep them across restarts
 - [x] Custom volume & brightness HUDs replacing the system pop-ups, including monitor-speaker volume over DDC (DisplayPort/HDMI audio, which macOS itself can't control)
 - [x] System stats: CPU / GPU / RAM / network, battery & charging flash, AirPods battery
-- [ ] Calendar glance, quick timers, and a Pomodoro timer as notch live activities
+- [x] Calendar page (month grid + per-day events), quick timers with completion ring, and a full Pomodoro timer — running timers stay glanceable in the collapsed notch as live activities
 
 ## Principles
 
