@@ -6,6 +6,7 @@ import CoreGraphics
 enum NotchCard {
     case nowPlaying
     case shelf
+    case stats
 }
 
 /// State shared between the panel controller (AppKit side) and the SwiftUI

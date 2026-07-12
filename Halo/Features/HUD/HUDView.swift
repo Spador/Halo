@@ -8,11 +8,16 @@ struct HUDView: View {
 
     private let barWidth: CGFloat = 58
 
+    /// Charging flashes are green; volume/brightness stay white.
+    private var tint: Color {
+        state.kind == .battery ? .green : .white
+    }
+
     var body: some View {
         HStack(spacing: 0) {
             Image(systemName: state.iconName)
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(tint)
                 .frame(width: NotchViewModel.hudWingWidth)
 
             // The physical notch: nothing can be drawn here.
@@ -30,7 +35,7 @@ struct HUDView: View {
             .frame(width: barWidth, height: 5)
             .overlay(alignment: .leading) {
                 Capsule()
-                    .fill(.white)
+                    .fill(tint)
                     .frame(width: barWidth * state.displayLevel)
             }
             .animation(.spring(response: 0.25, dampingFraction: 0.85), value: state.displayLevel)

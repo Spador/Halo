@@ -6,6 +6,7 @@ struct NotchShellView: View {
     let viewModel: NotchViewModel
     let nowPlaying: NowPlayingViewModel
     let shelf: ShelfViewModel
+    let stats: StatsViewModel
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -66,17 +67,27 @@ struct NotchShellView: View {
     /// Which card the open notch shows. A hovering file drag always forces
     /// the shelf; an explicit switcher choice is honored while that card
     /// still has content; otherwise: shelf if it holds files, then media,
-    /// then the idle placeholder.
-    private var activeCard: NotchCard? {
+    /// then stats — the always-available default.
+    private var activeCard: NotchCard {
         if viewModel.isDropTargeted { return .shelf }
         switch viewModel.selectedCard {
         case .shelf where shelf.hasItems: return .shelf
         case .nowPlaying where nowPlaying.info != nil: return .nowPlaying
+        case .stats: return .stats
         default: break
         }
         if shelf.hasItems { return .shelf }
         if nowPlaying.info != nil { return .nowPlaying }
-        return nil
+        return .stats
+    }
+
+    /// Cards worth offering in the switcher right now (stats always is).
+    private var availableCards: [(card: NotchCard, symbol: String)] {
+        var cards: [(NotchCard, String)] = []
+        if nowPlaying.info != nil { cards.append((.nowPlaying, "music.note")) }
+        if shelf.hasItems { cards.append((.shelf, "tray.fill")) }
+        cards.append((.stats, "chart.bar.fill"))
+        return cards
     }
 
     @ViewBuilder
@@ -88,19 +99,20 @@ struct NotchShellView: View {
             if let info = nowPlaying.info {
                 NowPlayingView(viewModel: nowPlaying, info: info)
             }
-        case nil:
-            placeholder
+        case .stats:
+            StatsView(viewModel: stats)
         }
     }
 
     /// Tiny switcher in the top-right strip beside the notch, shown only
-    /// when both cards have content to switch between.
+    /// when there's more than one card to switch between.
     @ViewBuilder
     private var cardSwitcher: some View {
-        if viewModel.isExpanded, shelf.hasItems, nowPlaying.info != nil {
+        if viewModel.isExpanded, availableCards.count > 1 {
             HStack(spacing: 5) {
-                cardButton(.nowPlaying, symbol: "music.note")
-                cardButton(.shelf, symbol: "tray.fill")
+                ForEach(availableCards, id: \.card) { entry in
+                    cardButton(entry.card, symbol: entry.symbol)
+                }
             }
             .padding(.top, 7)
             .padding(.trailing, 14)
@@ -121,17 +133,4 @@ struct NotchShellView: View {
         .buttonStyle(.plain)
     }
 
-    private var placeholder: some View {
-        VStack(spacing: 6) {
-            Image(systemName: "circle.dashed")
-                .font(.system(size: 26, weight: .light))
-                .foregroundStyle(.white.opacity(0.9))
-            Text("Halo")
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white)
-            Text("Expanded and ready — widgets arrive in later phases.")
-                .font(.system(size: 11))
-                .foregroundStyle(.white.opacity(0.55))
-        }
-    }
 }

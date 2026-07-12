@@ -12,7 +12,7 @@ Halo lives in and around the MacBook notch. Hover over it and it expands into a 
 - [x] Now Playing: album art, track info, play/pause/skip from the notch — works with any media source (Apple Music, Spotify, browser tabs)
 - [x] File shelf: drag files onto the notch to hold them, drag out or AirDrop them; pin items to keep them across restarts
 - [x] Custom volume & brightness HUDs replacing the system pop-ups, including monitor-speaker volume over DDC (DisplayPort/HDMI audio, which macOS itself can't control)
-- [ ] System stats: CPU / GPU / RAM / network, battery & charging, AirPods battery
+- [x] System stats: CPU / GPU / RAM / network, battery & charging flash, AirPods battery
 - [ ] Calendar glance, quick timers, and a Pomodoro timer as notch live activities
 
 ## Principles

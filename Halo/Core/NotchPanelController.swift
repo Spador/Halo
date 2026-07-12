@@ -23,7 +23,12 @@ final class NotchPanelController: NSObject {
     /// How long a volume/brightness flash stays before auto-hiding.
     private static let hudDisplayDuration: Duration = .milliseconds(1500)
 
-    init(screen: NSScreen, nowPlaying: NowPlayingViewModel, shelf: ShelfViewModel) {
+    init(
+        screen: NSScreen,
+        nowPlaying: NowPlayingViewModel,
+        shelf: ShelfViewModel,
+        stats: StatsViewModel
+    ) {
         geometry = NotchGeometry(screen: screen)
         panel = NotchPanel(contentRect: geometry.notchRect)
         self.shelf = shelf
@@ -33,7 +38,12 @@ final class NotchPanelController: NSObject {
 
         let hoverView = HoverTrackingView()
         let hostingView = NSHostingView(
-            rootView: NotchShellView(viewModel: viewModel, nowPlaying: nowPlaying, shelf: shelf)
+            rootView: NotchShellView(
+                viewModel: viewModel,
+                nowPlaying: nowPlaying,
+                shelf: shelf,
+                stats: stats
+            )
         )
         // Don't let SwiftUI dictate the window size — the controller owns it.
         hostingView.sizingOptions = []
