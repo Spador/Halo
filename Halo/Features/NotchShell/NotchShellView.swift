@@ -34,22 +34,49 @@ struct NotchShellView: View {
         return viewModel.notchSize
     }
 
+    /// Collapsed stays pure black to blend into the physical notch; the
+    /// expanded panel picks up a faint teal wash at the bottom.
+    private var shapeFill: AnyShapeStyle {
+        guard viewModel.isExpanded else { return AnyShapeStyle(Color.black) }
+        return AnyShapeStyle(
+            LinearGradient(
+                colors: [.black, Color(red: 0.015, green: 0.085, blue: 0.09)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+    }
+
     private var notchShape: some View {
         let expanded = viewModel.isExpanded
         let showingHUD = !expanded && (viewModel.hud != nil || viewModel.liveActivity != nil)
         let size = shapeSize
-
-        return UnevenRoundedRectangle(
-            cornerRadii: .init(
-                topLeading: expanded ? 12 : showingHUD ? 8 : 0,
-                bottomLeading: expanded ? 24 : showingHUD ? 14 : 9,
-                bottomTrailing: expanded ? 24 : showingHUD ? 14 : 9,
-                topTrailing: expanded ? 12 : showingHUD ? 8 : 0
-            ),
-            style: .continuous
+        let radii = RectangleCornerRadii(
+            topLeading: expanded ? 12 : showingHUD ? 8 : 0,
+            bottomLeading: expanded ? 24 : showingHUD ? 14 : 9,
+            bottomTrailing: expanded ? 24 : showingHUD ? 14 : 9,
+            topTrailing: expanded ? 12 : showingHUD ? 8 : 0
         )
-        .fill(.black)
+
+        return UnevenRoundedRectangle(cornerRadii: radii, style: .continuous)
+        .fill(shapeFill)
         .frame(width: size.width, height: size.height)
+        .overlay {
+            // The media card sits on a heavily blurred, darkened copy of
+            // the album artwork instead of the plain panel.
+            if expanded, activeCard == .nowPlaying,
+               let artwork = nowPlaying.info?.artwork {
+                Image(nsImage: artwork)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size.width, height: size.height)
+                    .blur(radius: 45)
+                    .overlay(Color.black.opacity(0.55))
+                    .clipShape(UnevenRoundedRectangle(cornerRadii: radii, style: .continuous))
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+            }
+        }
         .overlay(alignment: .top) {
             // A HUD flash takes the wings; the live activity holds them
             // otherwise and returns when the flash fades.
