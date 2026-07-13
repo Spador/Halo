@@ -1,6 +1,9 @@
 # macOS
 .DS_Store
 
+# Local planning notes, not for the public repo
+future-plans.txt
+
 # Xcode user state (window layout, open tabs, breakpoints — personal, not project)
 xcuserdata/
 *.xcuserstate
