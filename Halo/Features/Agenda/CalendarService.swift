@@ -40,10 +40,10 @@ final class CalendarService: NSObject {
         )
     }
 
-    /// Triggers the system permission prompt (first time only).
+    /// Triggers the system permission prompt (first time only), routed
+    /// through the central permissions manager.
     func connect() {
-        Task { [weak self] in
-            _ = try? await self?.store.requestFullAccessToEvents()
+        PermissionsManager.shared.request(.calendar) { [weak self] _ in
             guard let self else { return }
             self.authState = Self.currentAuthState()
             self.revision += 1

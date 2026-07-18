@@ -13,8 +13,43 @@ struct SettingsView: View {
                 .tabItem { Label("General", systemImage: "gearshape") }
             featuresTab
                 .tabItem { Label("Features", systemImage: "switch.2") }
+            permissionsTab
+                .tabItem { Label("Permissions", systemImage: "lock.shield") }
         }
         .frame(width: 440)
+    }
+
+    /// Live status of every macOS permission Halo can use, with the reason
+    /// it wants each one. Requests still happen at first feature use; this
+    /// tab is for seeing and fixing the state, not for asking early.
+    private var permissionsTab: some View {
+        Form {
+            ForEach(Permission.allCases) { permission in
+                Section {
+                    LabeledContent {
+                        statusText(PermissionsManager.shared.status(of: permission))
+                    } label: {
+                        Label(permission.label, systemImage: permission.symbol)
+                    }
+                    Text(permission.explanation)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                    Button("Open System Settings") {
+                        PermissionsManager.shared.openSystemSettings(for: permission)
+                    }
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .onAppear { PermissionsManager.shared.refresh() }
+    }
+
+    private func statusText(_ status: PermissionStatus) -> Text {
+        switch status {
+        case .granted: Text("Granted").foregroundStyle(.green)
+        case .denied: Text("Not granted").foregroundStyle(.orange)
+        case .notDetermined: Text("Not asked yet").foregroundStyle(.secondary)
+        }
     }
 
     /// One toggle per module, straight off the `FeatureID` registry.

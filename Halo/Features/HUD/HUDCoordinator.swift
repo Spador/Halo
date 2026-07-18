@@ -21,27 +21,19 @@ final class HUDCoordinator: NSObject {
             self?.handle(key, isKeyDown: isKeyDown) ?? false
         }
 
-        if AXIsProcessTrusted() {
+        let permissions = PermissionsManager.shared
+        if permissions.status(of: .accessibility) == .granted {
             let started = tap.start()
             Logger.hud.notice("accessibility trusted; tap started: \(started)")
         } else {
-            Logger.hud.notice("accessibility NOT trusted; prompting")
-            // Shows the system's "Halo would like to control this computer
-            // using accessibility features" dialog, pointing the user to
-            // System Settings. We then wait for the grant notification
-            // instead of polling.
-            // Literal instead of kAXTrustedCheckOptionPrompt: that C global
-            // isn't concurrency-safe to reference under Swift 6, but its
-            // value is stable and documented.
-            let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
-            AXIsProcessTrustedWithOptions(options)
-
-            DistributedNotificationCenter.default().addObserver(
-                self,
-                selector: #selector(accessibilityPermissionsDidChange),
-                name: NSNotification.Name("com.apple.accessibility.api"),
-                object: nil
-            )
+            // Prompts now; the completion fires whenever the grant lands,
+            // even after a detour through System Settings.
+            Logger.hud.notice("accessibility NOT trusted; requesting")
+            permissions.request(.accessibility) { [weak self] status in
+                guard let self, status == .granted, !self.tap.isRunning else { return }
+                let started = self.tap.start()
+                Logger.hud.notice("accessibility granted while running; tap started: \(started)")
+            }
         }
     }
 
@@ -50,17 +42,6 @@ final class HUDCoordinator: NSObject {
     func stop() {
         tap.stop()
         Logger.hud.notice("HUD feature disabled; tap stopped")
-    }
-
-    @objc private func accessibilityPermissionsDidChange() {
-        // The notification can arrive a beat before TCC reports the new
-        // state, hence the short delay before rechecking.
-        Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(500))
-            guard let self, !self.tap.isRunning, AXIsProcessTrusted() else { return }
-            let started = self.tap.start()
-            Logger.hud.notice("accessibility granted while running; tap started: \(started)")
-        }
     }
 
     /// Returns true to swallow the key press (suppressing the system HUD).
