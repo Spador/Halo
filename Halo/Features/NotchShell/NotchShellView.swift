@@ -19,14 +19,14 @@ struct NotchShellView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .animation(.spring(response: 0.38, dampingFraction: 0.8), value: viewModel.isExpanded)
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: viewModel.hud)
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: viewModel.liveActivity)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: viewModel.liveActivities)
     }
 
     /// The island has three sizes: the exact notch (idle), notch plus slim
     /// wings (HUD flash or live activity), and the full panel (hovered).
     private var shapeSize: CGSize {
         if viewModel.isExpanded { return NotchViewModel.expandedSize }
-        if viewModel.hud != nil || viewModel.liveActivity != nil {
+        if viewModel.hud != nil || !viewModel.liveActivities.isEmpty {
             return CGSize(
                 width: viewModel.notchSize.width + 2 * NotchViewModel.hudWingWidth,
                 height: viewModel.notchSize.height + NotchViewModel.hudExtraHeight
@@ -50,7 +50,7 @@ struct NotchShellView: View {
 
     private var notchShape: some View {
         let expanded = viewModel.isExpanded
-        let showingHUD = !expanded && (viewModel.hud != nil || viewModel.liveActivity != nil)
+        let showingHUD = !expanded && (viewModel.hud != nil || !viewModel.liveActivities.isEmpty)
         let size = shapeSize
         let radii = RectangleCornerRadii(
             topLeading: expanded ? 12 : showingHUD ? 8 : 0,
@@ -85,9 +85,12 @@ struct NotchShellView: View {
                 if let hud = viewModel.hud {
                     HUDView(state: hud, notchSize: viewModel.notchSize)
                         .transition(.opacity)
-                } else if let activity = viewModel.liveActivity {
-                    LiveActivityView(activity: activity, notchSize: viewModel.notchSize)
-                        .transition(.opacity)
+                } else if !viewModel.liveActivities.isEmpty {
+                    LiveActivityView(
+                        items: viewModel.liveActivities,
+                        notchSize: viewModel.notchSize
+                    )
+                    .transition(.opacity)
                 }
             }
         }

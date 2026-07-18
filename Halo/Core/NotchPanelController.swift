@@ -140,20 +140,20 @@ final class NotchPanelController: NSObject {
     /// The window size when not expanded: notch-sized normally, wing-sized
     /// while a HUD flash or live activity is showing.
     private var restFrame: CGRect {
-        viewModel.hud != nil || viewModel.liveActivity != nil
+        viewModel.hud != nil || !viewModel.liveActivities.isEmpty
             ? hudFrame
             : geometry.notchRect
     }
 
-    // MARK: - Live activity (running timer in the wings)
+    // MARK: - Live activities (engine-fed wing displays)
 
     /// Updates the persistent wing display. The window only re-frames when
-    /// the activity appears or disappears — per-second text updates reuse
-    /// the existing frame.
-    func setLiveActivity(_ activity: LiveActivity?) {
-        let hadWings = viewModel.liveActivity != nil
-        viewModel.liveActivity = activity
-        let hasWings = activity != nil
+    /// activities appear or disappear entirely — per-second text updates
+    /// and slot changes reuse the existing frame.
+    func setLiveActivities(_ items: [LiveActivityItem]) {
+        let hadWings = !viewModel.liveActivities.isEmpty
+        viewModel.liveActivities = items
+        let hasWings = !items.isEmpty
         guard hadWings != hasWings,
               !viewModel.isExpanded,
               viewModel.hud == nil

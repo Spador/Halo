@@ -41,9 +41,10 @@ final class NotchViewModel {
     /// Set by the panel controller, cleared by its auto-hide timer.
     var hud: HUDState?
 
-    /// Persistent wing display (running timer). Outlives HUD flashes; a
-    /// HUD briefly covers it, then it returns.
-    var liveActivity: LiveActivity?
+    /// Persistent wing displays (at most two), chosen by the live activity
+    /// engine. Outlives HUD flashes; a HUD briefly covers them, then they
+    /// return.
+    var liveActivities: [LiveActivityItem] = []
 
     /// Size of the physical notch, so the collapsed shape matches it
     /// exactly. Updated by the controller when screens change.

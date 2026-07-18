@@ -10,9 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var calendar: CalendarService?
     private var quickTimer: QuickTimerEngine?
     private var pomodoro: PomodoroEngine?
-    /// Latest live activity from each engine, merged for the wings.
-    private var timerActivity: LiveActivity?
-    private var pomodoroActivity: LiveActivity?
+    private var liveActivities: LiveActivityEngine?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard let screen = NotchGeometry.preferredScreen() else { return }
@@ -35,17 +33,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
         controller.show()
 
-        // Both engines can run at once; the wings show the quick timer
-        // when both are active (it's usually the shorter, more urgent one).
-        quickTimer.onLiveActivityChanged = { [weak self, weak controller] activity in
-            guard let self else { return }
-            self.timerActivity = activity
-            controller?.setLiveActivity(self.timerActivity ?? self.pomodoroActivity)
+        // Every feature publishes its live activity to the engine, which
+        // ranks them and hands the controller at most two to display.
+        let liveActivities = LiveActivityEngine()
+        liveActivities.onDisplayChanged = { [weak controller] items in
+            controller?.setLiveActivities(items)
         }
-        pomodoro.onLiveActivityChanged = { [weak self, weak controller] activity in
-            guard let self else { return }
-            self.pomodoroActivity = activity
-            controller?.setLiveActivity(self.timerActivity ?? self.pomodoroActivity)
+        quickTimer.onLiveActivityChanged = { [weak liveActivities] activity in
+            liveActivities?.publish(activity, from: .quickTimer)
+        }
+        pomodoro.onLiveActivityChanged = { [weak liveActivities] activity in
+            liveActivities?.publish(activity, from: .pomodoro)
         }
 
         let hud = HUDCoordinator { [weak controller] state in
@@ -89,6 +87,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.calendar = calendar
         self.quickTimer = quickTimer
         self.pomodoro = pomodoro
+        self.liveActivities = liveActivities
         notchController = controller
     }
 
