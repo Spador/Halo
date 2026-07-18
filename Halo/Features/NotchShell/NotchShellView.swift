@@ -4,6 +4,7 @@ import SwiftUI
 /// screen that springs between the exact notch size and the expanded panel.
 struct NotchShellView: View {
     let viewModel: NotchViewModel
+    let settings: SettingsStore
     let nowPlaying: NowPlayingViewModel
     let shelf: ShelfViewModel
     let stats: StatsViewModel
@@ -106,13 +107,18 @@ struct NotchShellView: View {
         .overlay(alignment: .topTrailing) { cardSwitcher }
     }
 
+    private func enabled(_ feature: FeatureID) -> Bool {
+        settings.isEnabled(feature)
+    }
+
     /// Which card the open notch shows. A hovering file drag always forces
     /// the shelf; an explicit switcher choice is honored while that card
     /// still has content; otherwise: shelf if it holds files, then media,
-    /// then stats — the always-available default.
-    private var activeCard: NotchCard {
-        if viewModel.isDropTargeted { return .shelf }
-        if let selected = viewModel.selectedCard {
+    /// then stats — the usual default. Disabled features are skipped
+    /// everywhere; nil means every card is switched off.
+    private var activeCard: NotchCard? {
+        if viewModel.isDropTargeted, enabled(.shelf) { return .shelf }
+        if let selected = viewModel.selectedCard, enabled(selected.feature) {
             switch selected {
             // Content-dependent cards fall through when empty.
             case .shelf: if shelf.hasItems { return .shelf }
@@ -121,22 +127,28 @@ struct NotchShellView: View {
             case .calendar, .timer, .pomodoro, .stats: return selected
             }
         }
-        if shelf.hasItems { return .shelf }
-        if nowPlaying.info != nil { return .nowPlaying }
-        if quickTimer.countdown != nil { return .timer }
-        if pomodoro.session != nil { return .pomodoro }
-        return .stats
+        if enabled(.shelf), shelf.hasItems { return .shelf }
+        if enabled(.nowPlaying), nowPlaying.info != nil { return .nowPlaying }
+        if enabled(.timer), quickTimer.countdown != nil { return .timer }
+        if enabled(.pomodoro), pomodoro.session != nil { return .pomodoro }
+        if enabled(.stats) { return .stats }
+        // Stats is off too: fall back to any page that is still on.
+        return [NotchCard.calendar, .timer, .pomodoro].first { enabled($0.feature) }
     }
 
-    /// Cards worth offering in the switcher (the four pages always are).
+    /// Cards worth offering in the switcher (enabled pages always are).
     private var availableCards: [(card: NotchCard, symbol: String)] {
         var cards: [(NotchCard, String)] = []
-        if nowPlaying.info != nil { cards.append((.nowPlaying, "music.note")) }
-        if shelf.hasItems { cards.append((.shelf, "tray.fill")) }
-        cards.append((.calendar, "calendar"))
-        cards.append((.timer, "timer"))
-        cards.append((.pomodoro, "brain.head.profile"))
-        cards.append((.stats, "chart.bar.fill"))
+        if enabled(.nowPlaying), nowPlaying.info != nil {
+            cards.append((.nowPlaying, "music.note"))
+        }
+        if enabled(.shelf), shelf.hasItems {
+            cards.append((.shelf, "tray.fill"))
+        }
+        if enabled(.calendar) { cards.append((.calendar, "calendar")) }
+        if enabled(.timer) { cards.append((.timer, "timer")) }
+        if enabled(.pomodoro) { cards.append((.pomodoro, "brain.head.profile")) }
+        if enabled(.stats) { cards.append((.stats, "chart.bar.fill")) }
         return cards
     }
 
@@ -157,6 +169,11 @@ struct NotchShellView: View {
             PomodoroPageView(engine: pomodoro)
         case .stats:
             StatsView(viewModel: stats)
+        case nil:
+            Text("Everything is switched off in Settings")
+                .font(.callout)
+                .foregroundStyle(.white.opacity(0.4))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 

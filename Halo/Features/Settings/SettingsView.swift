@@ -11,8 +11,40 @@ struct SettingsView: View {
         TabView {
             generalTab
                 .tabItem { Label("General", systemImage: "gearshape") }
+            featuresTab
+                .tabItem { Label("Features", systemImage: "switch.2") }
         }
         .frame(width: 440)
+    }
+
+    /// One toggle per module, straight off the `FeatureID` registry.
+    private var featuresTab: some View {
+        Form {
+            ForEach(FeatureID.allCases) { feature in
+                Toggle(isOn: binding(for: feature)) {
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(feature.label)
+                            Text(feature.detail)
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: feature.symbol)
+                    }
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    /// Routes through `setEnabled` so the store can notify the composition
+    /// root to start or stop the services behind the feature.
+    private func binding(for feature: FeatureID) -> Binding<Bool> {
+        Binding(
+            get: { settings.isEnabled(feature) },
+            set: { settings.setEnabled(feature, $0) }
+        )
     }
 
     private var generalTab: some View {

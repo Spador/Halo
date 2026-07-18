@@ -10,6 +10,9 @@ final class HoverTrackingView: NSView {
     var onPointerEntered: () -> Void = {}
     var onPointerExited: () -> Void = {}
     var onClicked: () -> Void = {}
+    /// Consulted before accepting a drag, so the shelf feature flag can
+    /// refuse drops without the view knowing about settings.
+    var isDropAllowed: () -> Bool = { true }
     var onDragEntered: () -> Void = {}
     var onDragExited: () -> Void = {}
     var onDropped: ([URL]) -> Void = { _ in }
@@ -61,7 +64,7 @@ final class HoverTrackingView: NSView {
     }
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        guard !fileURLs(from: sender).isEmpty else { return [] }
+        guard isDropAllowed(), !fileURLs(from: sender).isEmpty else { return [] }
         dropCompleted = false
         onDragEntered()
         return .copy
@@ -73,7 +76,7 @@ final class HoverTrackingView: NSView {
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         let urls = fileURLs(from: sender)
-        guard !urls.isEmpty else { return false }
+        guard isDropAllowed(), !urls.isEmpty else { return false }
         dropCompleted = true
         onDropped(urls)
         return true

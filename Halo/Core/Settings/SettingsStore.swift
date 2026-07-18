@@ -37,11 +37,40 @@ final class SettingsStore {
         didSet { defaults.set(hoverDelayMilliseconds, forKey: Keys.hoverDelay) }
     }
 
+    // MARK: - Feature flags
+
+    /// Features the user turned off. Stored inverted so the default —
+    /// an absent key — means everything is on.
+    private var disabledFeatures: Set<String> {
+        didSet {
+            defaults.set(Array(disabledFeatures).sorted(), forKey: Keys.disabledFeatures)
+        }
+    }
+
+    /// The composition root (AppDelegate) hooks this to start and stop the
+    /// services behind a feature when its toggle flips at runtime.
+    @ObservationIgnored var onFeatureChanged: ((FeatureID, Bool) -> Void)?
+
+    func isEnabled(_ feature: FeatureID) -> Bool {
+        !disabledFeatures.contains(feature.rawValue)
+    }
+
+    func setEnabled(_ feature: FeatureID, _ enabled: Bool) {
+        guard enabled == disabledFeatures.contains(feature.rawValue) else { return }
+        if enabled {
+            disabledFeatures.remove(feature.rawValue)
+        } else {
+            disabledFeatures.insert(feature.rawValue)
+        }
+        onFeatureChanged?(feature, enabled)
+    }
+
     private let defaults: UserDefaults
 
     private enum Keys {
         static let expandTrigger = "settings.expandTrigger"
         static let hoverDelay = "settings.hoverDelayMilliseconds"
+        static let disabledFeatures = "settings.disabledFeatures"
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -51,5 +80,7 @@ final class SettingsStore {
             ?? .hover
         hoverDelayMilliseconds =
             defaults.object(forKey: Keys.hoverDelay) as? Int ?? 0
+        disabledFeatures =
+            Set(defaults.stringArray(forKey: Keys.disabledFeatures) ?? [])
     }
 }

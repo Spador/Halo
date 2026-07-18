@@ -14,6 +14,9 @@ final class NowPlayingService {
     private var streamProcess: Process?
     private var streamTask: Task<Void, Never>?
     private var restartAttempts = 0
+    /// Distinguishes a deliberate stop (quit, feature toggled off) from the
+    /// helper dying — only the latter should trigger the restart loop.
+    private var intentionallyStopped = false
     private static let maxRestartAttempts = 5
 
     private let perlPath = "/usr/bin/perl"
@@ -30,6 +33,7 @@ final class NowPlayingService {
 
     func start() {
         guard streamProcess == nil else { return }
+        intentionallyStopped = false
         guard let scriptURL, let frameworkURL else {
             assertionFailure("mediaremote-adapter resources missing from bundle")
             return
@@ -73,6 +77,7 @@ final class NowPlayingService {
     }
 
     func stop() {
+        intentionallyStopped = true
         streamTask?.cancel()
         streamTask = nil
         streamProcess?.terminate()
@@ -104,7 +109,8 @@ final class NowPlayingService {
         streamTask = nil
         onUpdate(nil)
 
-        guard restartAttempts < Self.maxRestartAttempts else { return }
+        guard !intentionallyStopped,
+              restartAttempts < Self.maxRestartAttempts else { return }
         restartAttempts += 1
         Task { [weak self] in
             try? await Task.sleep(for: .seconds(2))

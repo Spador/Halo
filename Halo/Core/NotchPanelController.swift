@@ -47,6 +47,7 @@ final class NotchPanelController: NSObject {
         let hostingView = NSHostingView(
             rootView: NotchShellView(
                 viewModel: viewModel,
+                settings: settings,
                 nowPlaying: nowPlaying,
                 shelf: shelf,
                 stats: stats,
@@ -65,6 +66,9 @@ final class NotchPanelController: NSObject {
         hoverView.onPointerEntered = { [weak self] in self?.pointerDidEnter() }
         hoverView.onPointerExited = { [weak self] in self?.pointerDidExit() }
         hoverView.onClicked = { [weak self] in self?.expand() }
+        hoverView.isDropAllowed = { [weak self] in
+            self?.settings.isEnabled(.shelf) ?? false
+        }
         hoverView.onDragEntered = { [weak self] in self?.dragDidEnter() }
         hoverView.onDragExited = { [weak self] in self?.dragDidExit() }
         hoverView.onDropped = { [weak self] urls in self?.handleDrop(urls) }

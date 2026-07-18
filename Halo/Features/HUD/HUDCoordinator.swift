@@ -45,6 +45,13 @@ final class HUDCoordinator: NSObject {
         }
     }
 
+    /// Feature toggled off: release the event tap so the stock system
+    /// HUDs come back instantly. The Accessibility grant itself stays.
+    func stop() {
+        tap.stop()
+        Logger.hud.notice("HUD feature disabled; tap stopped")
+    }
+
     @objc private func accessibilityPermissionsDidChange() {
         // The notification can arrive a beat before TCC reports the new
         // state, hence the short delay before rechecking.

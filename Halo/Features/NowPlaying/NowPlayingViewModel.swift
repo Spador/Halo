@@ -13,13 +13,19 @@ final class NowPlayingViewModel {
         service.onUpdate = { [weak self] info in
             self?.info = info
         }
+    }
+
+    /// Spawns the streaming helper. The composition root calls this only
+    /// when the Now Playing feature is enabled.
+    func start() {
         service.start()
     }
 
-    /// Called when the app quits so the perl helper dies immediately
-    /// instead of lingering until its next write fails.
+    /// Called on quit or feature toggle-off so the perl helper dies
+    /// immediately instead of lingering until its next write fails.
     func shutdown() {
         service.stop()
+        info = nil
     }
 
     func togglePlayPause() {
