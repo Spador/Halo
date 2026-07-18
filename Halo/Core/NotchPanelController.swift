@@ -88,6 +88,19 @@ final class NotchPanelController: NSObject {
         panel.orderFrontRegardless()
     }
 
+    // MARK: - Global shortcut entry points
+
+    func toggleExpanded() {
+        viewModel.isExpanded ? collapse() : expand()
+    }
+
+    /// Jumps straight to a card. If its feature is disabled or the card is
+    /// empty, the shell's normal fallback rules pick what actually shows.
+    func openCard(_ card: NotchCard) {
+        viewModel.selectedCard = card
+        expand()
+    }
+
     /// Pointer hover honors the user's trigger setting; a click (below, via
     /// `onClicked`) and an incoming file drag always open the panel.
     private func pointerDidEnter() {

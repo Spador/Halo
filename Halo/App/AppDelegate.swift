@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var quickTimer: QuickTimerEngine?
     private var pomodoro: PomodoroEngine?
     private var liveActivities: LiveActivityEngine?
+    private var hotKeys: HotKeyCenter?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard let screen = NotchGeometry.preferredScreen() else { return }
@@ -73,6 +74,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        // Global shortcuts jump straight to a page from any app.
+        let hotKeys = HotKeyCenter()
+        hotKeys.onAction = { [weak controller] action in
+            if let card = action.card {
+                controller?.openCard(card)
+            } else {
+                controller?.toggleExpanded()
+            }
+        }
+        hotKeys.apply(settings.typedHotKeyBindings())
+        settings.onHotKeysChanged = { [weak self] in
+            guard let self, let hotKeys = self.hotKeys else { return }
+            hotKeys.apply(SettingsStore.shared.typedHotKeyBindings())
+        }
+        settings.onHotKeyRecordingChanged = { [weak self] recording in
+            guard let hotKeys = self?.hotKeys else { return }
+            recording ? hotKeys.suspend() : hotKeys.resume()
+        }
+
         // Plugging in the charger flashes a green battery HUD in the wings.
         battery.onChargingBegan = { [weak controller] status in
             controller?.showHUD(
@@ -88,6 +108,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.quickTimer = quickTimer
         self.pomodoro = pomodoro
         self.liveActivities = liveActivities
+        self.hotKeys = hotKeys
         notchController = controller
     }
 

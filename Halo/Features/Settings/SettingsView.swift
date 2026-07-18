@@ -13,10 +13,42 @@ struct SettingsView: View {
                 .tabItem { Label("General", systemImage: "gearshape") }
             featuresTab
                 .tabItem { Label("Features", systemImage: "switch.2") }
+            shortcutsTab
+                .tabItem { Label("Shortcuts", systemImage: "keyboard") }
             permissionsTab
                 .tabItem { Label("Permissions", systemImage: "lock.shield") }
         }
         .frame(width: 440)
+    }
+
+    private var shortcutsTab: some View {
+        Form {
+            Section {
+                ForEach(HotKeyAction.allCases) { action in
+                    LabeledContent(action.label) {
+                        HStack(spacing: 6) {
+                            ShortcutRecorder(action: action, settings: settings)
+                            Button {
+                                settings.setBinding(nil, for: action)
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            .help("Remove this shortcut")
+                            // Hidden instead of absent keeps rows aligned.
+                            .opacity(settings.binding(for: action) == nil ? 0 : 1)
+                            .disabled(settings.binding(for: action) == nil)
+                        }
+                    }
+                }
+            } footer: {
+                Text("Shortcuts work from any app. Click a button, then press a combination that includes Command, Control, or Option. Escape cancels a recording; the x removes a shortcut.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .formStyle(.grouped)
     }
 
     /// Live status of every macOS permission Halo can use, with the reason

@@ -65,12 +65,64 @@ final class SettingsStore {
         onFeatureChanged?(feature, enabled)
     }
 
+    // MARK: - Global shortcuts
+
+    /// Hotkey bindings keyed by `HotKeyAction` raw value. Empty by default:
+    /// the user records combos in Settings.
+    private var hotKeyBindings: [String: KeyCombo] {
+        didSet {
+            if let data = try? JSONEncoder().encode(hotKeyBindings) {
+                defaults.set(data, forKey: Keys.hotKeys)
+            }
+            onHotKeysChanged?()
+        }
+    }
+
+    /// The composition root re-registers all hotkeys when bindings change.
+    @ObservationIgnored var onHotKeysChanged: (() -> Void)?
+
+    /// True while a Settings recorder is armed; the composition root
+    /// suspends hotkey registrations so the combo reaches the recorder.
+    @ObservationIgnored var onHotKeyRecordingChanged: ((Bool) -> Void)?
+
+    func setHotKeyRecording(_ active: Bool) {
+        onHotKeyRecordingChanged?(active)
+    }
+
+    func binding(for action: HotKeyAction) -> KeyCombo? {
+        hotKeyBindings[action.rawValue]
+    }
+
+    /// Assigns (or with nil, clears) an action's combo. A combo can serve
+    /// only one action, so assigning steals it from any other action.
+    func setBinding(_ combo: KeyCombo?, for action: HotKeyAction) {
+        var updated = hotKeyBindings
+        if let combo {
+            for (key, existing) in updated where existing == combo {
+                updated.removeValue(forKey: key)
+            }
+            updated[action.rawValue] = combo
+        } else {
+            updated.removeValue(forKey: action.rawValue)
+        }
+        hotKeyBindings = updated
+    }
+
+    /// The bindings in the typed form `HotKeyCenter.apply` wants.
+    func typedHotKeyBindings() -> [HotKeyAction: KeyCombo] {
+        hotKeyBindings.reduce(into: [:]) { result, entry in
+            guard let action = HotKeyAction(rawValue: entry.key) else { return }
+            result[action] = entry.value
+        }
+    }
+
     private let defaults: UserDefaults
 
     private enum Keys {
         static let expandTrigger = "settings.expandTrigger"
         static let hoverDelay = "settings.hoverDelayMilliseconds"
         static let disabledFeatures = "settings.disabledFeatures"
+        static let hotKeys = "settings.hotKeyBindings"
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -82,5 +134,9 @@ final class SettingsStore {
             defaults.object(forKey: Keys.hoverDelay) as? Int ?? 0
         disabledFeatures =
             Set(defaults.stringArray(forKey: Keys.disabledFeatures) ?? [])
+        hotKeyBindings =
+            defaults.data(forKey: Keys.hotKeys)
+                .flatMap { try? JSONDecoder().decode([String: KeyCombo].self, from: $0) }
+            ?? [:]
     }
 }
