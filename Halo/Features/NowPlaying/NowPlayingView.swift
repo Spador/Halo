@@ -5,6 +5,11 @@ struct NowPlayingView: View {
     let viewModel: NowPlayingViewModel
     let info: NowPlayingInfo
 
+    /// While the user drags the bar, it follows the finger instead of
+    /// playback; the seek fires once on release.
+    @State private var isScrubbing = false
+    @State private var scrubFraction: Double = 0
+
     var body: some View {
         VStack(spacing: 10) {
             HStack(spacing: 12) {
@@ -61,17 +66,50 @@ struct NowPlayingView: View {
     /// timers, zero work.
     private var progressView: some View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in
-            let elapsed = info.estimatedElapsed(at: context.date)
+            let liveElapsed = info.estimatedElapsed(at: context.date)
+            let fraction =
+                isScrubbing ? scrubFraction : progressFraction(elapsed: liveElapsed)
+            let shownElapsed =
+                isScrubbing ? scrubFraction * (info.duration ?? 0) : liveElapsed
             HStack(spacing: 8) {
-                Text(timeString(elapsed))
-                ProgressView(value: progressFraction(elapsed: elapsed))
-                    .progressViewStyle(.linear)
-                    .tint(.white)
+                Text(timeString(shownElapsed))
+                progressBar(fraction: fraction)
                 Text(timeString(info.duration))
             }
             .font(.system(size: 10).monospacedDigit())
             .foregroundStyle(.white.opacity(0.55))
         }
+    }
+
+    /// The bar is draggable whenever the source reports a duration (without
+    /// one there is no position to seek to).
+    private func progressBar(fraction: Double) -> some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            ZStack(alignment: .leading) {
+                Capsule().fill(.white.opacity(0.25))
+                Capsule()
+                    .fill(.white)
+                    .frame(width: max(fraction * width, 0))
+            }
+            // Negative inset: a 5pt bar is a mean drag target; accept
+            // grabs from a few points above and below too.
+            .contentShape(Rectangle().inset(by: -8))
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { drag in
+                        guard info.duration != nil else { return }
+                        isScrubbing = true
+                        scrubFraction = min(max(drag.location.x / width, 0), 1)
+                    }
+                    .onEnded { _ in
+                        guard isScrubbing, let duration = info.duration else { return }
+                        viewModel.seek(to: scrubFraction * duration)
+                        isScrubbing = false
+                    }
+            )
+        }
+        .frame(height: 5)
     }
 
     private func progressFraction(elapsed: TimeInterval?) -> Double {

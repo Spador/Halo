@@ -1,3 +1,4 @@
+import Foundation
 import Observation
 
 /// Presentation state for the Now Playing module. Views read `info`;
@@ -37,4 +38,12 @@ final class NowPlayingViewModel {
 
     func nextTrack() { service.send(.nextTrack) }
     func previousTrack() { service.send(.previousTrack) }
+
+    /// Jumps to an absolute position (progress bar drag). Optimistic like
+    /// play/pause: the bar moves instantly, the stream confirms shortly.
+    func seek(to seconds: TimeInterval) {
+        service.seek(to: seconds)
+        info?.elapsed = seconds
+        info?.elapsedCapturedAt = Date()
+    }
 }

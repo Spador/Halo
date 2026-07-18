@@ -87,15 +87,20 @@ final class NowPlayingService {
     /// Fire-and-forget: a short perl invocation that sends one MediaRemote
     /// command and exits.
     func send(_ command: MediaCommand) {
+        runOneShot(["send", String(command.rawValue)])
+    }
+
+    /// Jumps playback to an absolute position. The adapter's seek function
+    /// takes microseconds.
+    func seek(to seconds: TimeInterval) {
+        runOneShot(["seek", String(Int64(seconds * 1_000_000))])
+    }
+
+    private func runOneShot(_ arguments: [String]) {
         guard let scriptURL, let frameworkURL else { return }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: perlPath)
-        process.arguments = [
-            scriptURL.path,
-            frameworkURL.path,
-            "send",
-            String(command.rawValue),
-        ]
+        process.arguments = [scriptURL.path, frameworkURL.path] + arguments
         process.standardOutput = FileHandle.nullDevice
         process.standardError = FileHandle.nullDevice
         try? process.run()
