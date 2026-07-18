@@ -5,7 +5,12 @@ import Observation
 /// buttons call the intent methods, which forward to the service.
 @Observable
 final class NowPlayingViewModel {
-    private(set) var info: NowPlayingInfo?
+    private(set) var info: NowPlayingInfo? {
+        didSet { onInfoChanged?(info) }
+    }
+
+    /// The composition root feeds this into the live activity engine.
+    @ObservationIgnored var onInfoChanged: ((NowPlayingInfo?) -> Void)?
 
     @ObservationIgnored private let service: NowPlayingService
 

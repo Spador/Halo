@@ -93,7 +93,8 @@ struct NotchShellView: View {
                 } else if !viewModel.liveActivities.isEmpty {
                     LiveActivityView(
                         items: viewModel.liveActivities,
-                        notchSize: viewModel.notchSize
+                        notchSize: viewModel.notchSize,
+                        accent: settings.accent.color
                     )
                     .transition(.opacity)
                 }

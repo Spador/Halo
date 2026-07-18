@@ -13,9 +13,12 @@ struct EqualizerBars: View {
     var barCount: Int = 4
     var maxHeight: CGFloat = 16
     var barWidth: CGFloat = 3
+    /// The wings run at a lower rate than the card: they animate while the
+    /// notch is collapsed, so they must stay near-free.
+    var framesPerSecond: Double = 20
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 20, paused: !isPlaying)) { context in
+        TimelineView(.animation(minimumInterval: 1.0 / framesPerSecond, paused: !isPlaying)) { context in
             let time = context.date.timeIntervalSinceReferenceDate
             HStack(alignment: .bottom, spacing: barWidth * 0.8) {
                 ForEach(0..<barCount, id: \.self) { bar in

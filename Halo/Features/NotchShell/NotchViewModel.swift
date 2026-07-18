@@ -1,3 +1,4 @@
+import AppKit
 import Observation
 import CoreGraphics
 
@@ -20,6 +21,10 @@ struct LiveActivity: Equatable {
     var text: String
     /// Emphasized activities render green (Pomodoro breaks, completion).
     var emphasized: Bool
+    /// Media activities show artwork and an equalizer instead of icon and
+    /// text. Nil artwork falls back to the icon.
+    var artwork: NSImage?
+    var isMedia: Bool = false
 }
 
 /// State shared between the panel controller (AppKit side) and the SwiftUI

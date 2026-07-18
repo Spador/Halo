@@ -54,6 +54,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         pomodoro.onLiveActivityChanged = { [weak liveActivities] activity in
             liveActivities?.publish(activity, from: .pomodoro)
         }
+        nowPlaying.onInfoChanged = { [weak self] info in
+            self?.publishMediaActivity(info)
+        }
 
         let hud = HUDCoordinator(volume: volume, brightness: displays) {
             [weak controller] state in
@@ -80,6 +83,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 if !enabled { self.quickTimer?.cancel() }
             case .pomodoro:
                 if !enabled { self.pomodoro?.reset() }
+            case .mediaActivity:
+                // Re-evaluate with the flag's new value.
+                self.publishMediaActivity(self.nowPlaying?.info)
             case .shelf, .controls, .scrollVolume, .stats, .calendar:
                 break  // View-level or checked at use; nothing to stop.
             }
@@ -127,6 +133,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         self.liveActivities = liveActivities
         self.hotKeys = hotKeys
         notchController = controller
+        // The stream may have delivered before the engine reference was
+        // stored above; publish once to catch up.
+        publishMediaActivity(nowPlaying.info)
 
         settings.onReplayOnboardingRequested = { [weak self] in
             self?.showOnboarding()
@@ -138,6 +147,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         nowPlaying?.shutdown()
+    }
+
+    /// Music holds a wing only while actually playing; pausing clears it.
+    private func publishMediaActivity(_ info: NowPlayingInfo?) {
+        let activity: LiveActivity? = {
+            guard SettingsStore.shared.isEnabled(.mediaActivity),
+                  let info, info.isPlaying
+            else { return nil }
+            return LiveActivity(
+                iconName: "music.note",
+                text: info.title,
+                emphasized: false,
+                artwork: info.artwork,
+                isMedia: true
+            )
+        }()
+        liveActivities?.publish(activity, from: .media)
     }
 
     // MARK: - Onboarding window
