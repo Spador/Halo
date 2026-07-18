@@ -1,0 +1,61 @@
+import Observation
+
+/// State for the control sliders card. Routes volume to whichever backend
+/// currently works — CoreAudio for normal outputs, DDC for monitor speakers
+/// over DisplayPort/HDMI — and brightness to the built-in panel.
+///
+/// Shares its backends with the HUD so key presses and slider drags always
+/// agree on the current level.
+@Observable
+final class ControlsViewModel {
+    private(set) var volumeLevel: Double = 0
+    private(set) var brightnessLevel: Double = 0
+    private(set) var volumeAvailable = false
+    private(set) var brightnessAvailable = false
+
+    @ObservationIgnored private let volume: VolumeControl
+    @ObservationIgnored private let displays: DisplayBrightnessManager
+
+    init(volume: VolumeControl, displays: DisplayBrightnessManager) {
+        self.volume = volume
+        self.displays = displays
+    }
+
+    /// Re-reads hardware state. Called when the card appears and after any
+    /// HUD key press, so the sliders track the keys live.
+    func refresh() {
+        if volume.canControlDefaultOutput {
+            volumeAvailable = true
+            volumeLevel = volume.isMuted ? 0 : volume.volume
+        } else if let level = displays.externalAudioVolume() {
+            volumeAvailable = true
+            volumeLevel = level
+        } else {
+            volumeAvailable = false
+        }
+
+        if let level = displays.builtinBrightness() {
+            brightnessAvailable = true
+            brightnessLevel = level
+        } else {
+            brightnessAvailable = false
+        }
+    }
+
+    func setVolume(_ level: Double) {
+        let clamped = min(max(level, 0), 1)
+        volumeLevel = clamped
+        if volume.canControlDefaultOutput {
+            if volume.isMuted, clamped > 0 { volume.setMuted(false) }
+            volume.setVolume(clamped)
+        } else {
+            _ = displays.setExternalAudioVolume(clamped)
+        }
+    }
+
+    func setBrightness(_ level: Double) {
+        let clamped = min(max(level, 0), 1)
+        brightnessLevel = clamped
+        _ = displays.setBuiltinBrightness(clamped)
+    }
+}

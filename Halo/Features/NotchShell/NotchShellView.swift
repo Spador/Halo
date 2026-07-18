@@ -7,6 +7,7 @@ struct NotchShellView: View {
     let settings: SettingsStore
     let nowPlaying: NowPlayingViewModel
     let shelf: ShelfViewModel
+    let controls: ControlsViewModel
     let stats: StatsViewModel
     let calendar: CalendarService
     let quickTimer: QuickTimerEngine
@@ -131,7 +132,7 @@ struct NotchShellView: View {
             case .shelf: if shelf.hasItems { return .shelf }
             case .nowPlaying: if nowPlaying.info != nil { return .nowPlaying }
             // Always-available pages honor the choice unconditionally.
-            case .calendar, .timer, .pomodoro, .stats: return selected
+            case .controls, .calendar, .timer, .pomodoro, .stats: return selected
             }
         }
         if enabled(.shelf), shelf.hasItems { return .shelf }
@@ -140,7 +141,7 @@ struct NotchShellView: View {
         if enabled(.pomodoro), pomodoro.session != nil { return .pomodoro }
         if enabled(.stats) { return .stats }
         // Stats is off too: fall back to any page that is still on.
-        return [NotchCard.calendar, .timer, .pomodoro].first { enabled($0.feature) }
+        return [NotchCard.controls, .calendar, .timer, .pomodoro].first { enabled($0.feature) }
     }
 
     /// Cards worth offering in the switcher (enabled pages always are).
@@ -152,6 +153,7 @@ struct NotchShellView: View {
         if enabled(.shelf), shelf.hasItems {
             cards.append((.shelf, "tray.fill"))
         }
+        if enabled(.controls) { cards.append((.controls, "slider.horizontal.3")) }
         if enabled(.calendar) { cards.append((.calendar, "calendar")) }
         if enabled(.timer) { cards.append((.timer, "timer")) }
         if enabled(.pomodoro) { cards.append((.pomodoro, "brain.head.profile")) }
@@ -164,6 +166,8 @@ struct NotchShellView: View {
         switch activeCard {
         case .shelf:
             ShelfView(viewModel: shelf, isDropTargeted: viewModel.isDropTargeted)
+        case .controls:
+            ControlsPageView(viewModel: controls, settings: settings)
         case .nowPlaying:
             if let info = nowPlaying.info {
                 NowPlayingView(viewModel: nowPlaying, info: info)

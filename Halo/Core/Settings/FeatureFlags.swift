@@ -7,6 +7,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
     case nowPlaying
     case shelf
     case hud
+    case controls
     case stats
     case calendar
     case timer
@@ -19,6 +20,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .nowPlaying: String(localized: "Now Playing")
         case .shelf: String(localized: "File shelf")
         case .hud: String(localized: "Volume and brightness HUD")
+        case .controls: String(localized: "Control sliders")
         case .stats: String(localized: "System stats")
         case .calendar: String(localized: "Calendar")
         case .timer: String(localized: "Quick timers")
@@ -31,6 +33,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .nowPlaying: "music.note"
         case .shelf: "tray.fill"
         case .hud: "speaker.wave.2.fill"
+        case .controls: "slider.horizontal.3"
         case .stats: "chart.bar.fill"
         case .calendar: "calendar"
         case .timer: "timer"
@@ -47,6 +50,8 @@ enum FeatureID: String, CaseIterable, Identifiable {
             String(localized: "Drop files on the notch to hold, drag out, or AirDrop them.")
         case .hud:
             String(localized: "Replaces the system volume and brightness pop ups. Off returns the stock ones.")
+        case .controls:
+            String(localized: "Volume and brightness sliders in the notch panel.")
         case .stats:
             String(localized: "CPU, GPU, RAM, network, and battery readouts.")
         case .calendar:
@@ -65,6 +70,7 @@ extension NotchCard {
         switch self {
         case .nowPlaying: .nowPlaying
         case .shelf: .shelf
+        case .controls: .controls
         case .calendar: .calendar
         case .timer: .timer
         case .pomodoro: .pomodoro

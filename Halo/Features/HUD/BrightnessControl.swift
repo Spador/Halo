@@ -51,6 +51,23 @@ final class BrightnessControl {
         return getFn(display, &value) == 0 ? value : 0
     }
 
+    /// Current level for the sliders, or nil when there is no controllable
+    /// built-in display (lid closed, or DisplayServices unavailable).
+    func currentBrightness() -> Double? {
+        guard let getFn, let display = builtinDisplayID else { return nil }
+        var value: Float = 0
+        guard getFn(display, &value) == 0 else { return nil }
+        return Double(value)
+    }
+
+    /// Absolute setter for the sliders; returns the clamped applied level.
+    func setBrightness(_ level: Double) -> Double? {
+        guard let setFn, let display = builtinDisplayID else { return nil }
+        let clamped = min(max(Float(level), 0), 1)
+        _ = setFn(display, clamped)
+        return Double(clamped)
+    }
+
     /// Applies one key-press step and returns the new level for the HUD,
     /// or nil when there is no controllable built-in display (lid closed).
     func stepBrightness(up: Bool) -> Double? {

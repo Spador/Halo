@@ -6,6 +6,7 @@ import CoreGraphics
 enum NotchCard {
     case nowPlaying
     case shelf
+    case controls
     case calendar
     case timer
     case pomodoro

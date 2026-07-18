@@ -7,11 +7,19 @@ import os
 /// event tap requires.
 final class HUDCoordinator: NSObject {
     private let tap = MediaKeyTap()
-    private let volume = VolumeControl()
-    private let brightness = DisplayBrightnessManager()
+    private let volume: VolumeControl
+    private let brightness: DisplayBrightnessManager
     private let showHUD: (HUDState) -> Void
 
-    init(showHUD: @escaping (HUDState) -> Void) {
+    /// The volume and display backends are shared with the control sliders
+    /// so both paths see one consistent (DDC-tracked) state.
+    init(
+        volume: VolumeControl,
+        brightness: DisplayBrightnessManager,
+        showHUD: @escaping (HUDState) -> Void
+    ) {
+        self.volume = volume
+        self.brightness = brightness
         self.showHUD = showHUD
         super.init()
     }

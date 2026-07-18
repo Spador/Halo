@@ -25,10 +25,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let calendar = CalendarService()
         let quickTimer = QuickTimerEngine()
         let pomodoro = PomodoroEngine()
+        // One volume backend and one display manager, shared by the HUD
+        // keys and the control sliders so their levels never disagree.
+        let volume = VolumeControl()
+        let displays = DisplayBrightnessManager()
+        let controls = ControlsViewModel(volume: volume, displays: displays)
         let controller = NotchPanelController(
             screen: screen,
             nowPlaying: nowPlaying,
             shelf: shelf,
+            controls: controls,
             stats: stats,
             calendar: calendar,
             quickTimer: quickTimer,
@@ -49,8 +55,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             liveActivities?.publish(activity, from: .pomodoro)
         }
 
-        let hud = HUDCoordinator { [weak controller] state in
+        let hud = HUDCoordinator(volume: volume, brightness: displays) {
+            [weak controller] state in
             controller?.showHUD(state)
+            // Keep the sliders in step when keys change a level.
+            controls.refresh()
         }
 
         // Services behind a feature flag only run while the flag is on.
@@ -71,7 +80,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 if !enabled { self.quickTimer?.cancel() }
             case .pomodoro:
                 if !enabled { self.pomodoro?.reset() }
-            case .shelf, .stats, .calendar:
+            case .shelf, .controls, .stats, .calendar:
                 break  // Purely view-level; the shell hides them.
             }
         }

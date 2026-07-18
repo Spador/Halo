@@ -75,6 +75,18 @@ final class DisplayBrightnessManager: NSObject {
         return clamped
     }
 
+    // MARK: - Absolute levels (control sliders)
+
+    /// Built-in panel brightness for the sliders, bypassing the pointer
+    /// routing the keys use. External brightness stays behind its flag.
+    func builtinBrightness() -> Double? {
+        builtin.currentBrightness()
+    }
+
+    func setBuiltinBrightness(_ level: Double) -> Double? {
+        builtin.setBrightness(level)
+    }
+
     // MARK: - External speaker volume (DDC)
 
     /// DisplayPort/HDMI audio has no system volume control — the monitor
@@ -104,6 +116,29 @@ final class DisplayBrightnessManager: NSObject {
         ddc.write(.audioVolume, value: UInt16(clamped * 100), to: service)
         externalAudioLevels[display] = clamped
         Logger.hud.debug("external audio volume via DDC: \(clamped)")
+        return clamped
+    }
+
+    /// Current monitor-speaker level for the sliders: last tracked value,
+    /// else one seed read over DDC. Nil when no external target exists.
+    func externalAudioVolume() -> Double? {
+        guard let (display, service) = primaryExternal else { return nil }
+        return externalAudioLevels[display]
+            ?? ddc.readPercent(.audioVolume, from: service).map { Double($0) / 100 }
+            ?? 0.25
+    }
+
+    /// Absolute setter for the sliders; mirrors the step path including
+    /// auto-unmute. Returns the clamped applied level.
+    func setExternalAudioVolume(_ level: Double) -> Double? {
+        guard let (display, service) = primaryExternal else { return nil }
+        if externalAudioMuted.contains(display) {
+            ddc.write(.audioMute, value: 2, to: service)
+            externalAudioMuted.remove(display)
+        }
+        let clamped = min(max(level, 0), 1)
+        ddc.write(.audioVolume, value: UInt16(clamped * 100), to: service)
+        externalAudioLevels[display] = clamped
         return clamped
     }
 
