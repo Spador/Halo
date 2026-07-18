@@ -174,6 +174,12 @@ struct SettingsView: View {
                         .foregroundStyle(.red)
                 }
             }
+
+            Section {
+                Button("Show the welcome tour") {
+                    settings.replayOnboarding()
+                }
+            }
         }
         .formStyle(.grouped)
     }

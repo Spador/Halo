@@ -37,6 +37,22 @@ final class SettingsStore {
         didSet { defaults.set(hoverDelayMilliseconds, forKey: Keys.hoverDelay) }
     }
 
+    // MARK: - Onboarding
+
+    /// Set once the welcome tour has been finished, skipped, or closed —
+    /// any of those means never show it automatically again.
+    var hasCompletedOnboarding: Bool {
+        didSet { defaults.set(hasCompletedOnboarding, forKey: Keys.onboarding) }
+    }
+
+    /// Settings has a "show the welcome tour" button; the composition root
+    /// owns the window, so the request travels through this hook.
+    @ObservationIgnored var onReplayOnboardingRequested: (() -> Void)?
+
+    func replayOnboarding() {
+        onReplayOnboardingRequested?()
+    }
+
     // MARK: - Appearance
 
     /// Accent for the expanded panel's tint and small highlights.
@@ -145,6 +161,7 @@ final class SettingsStore {
         static let panelOpacity = "settings.panelOpacity"
         static let disabledFeatures = "settings.disabledFeatures"
         static let hotKeys = "settings.hotKeyBindings"
+        static let onboarding = "settings.onboardingCompleted"
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -166,5 +183,6 @@ final class SettingsStore {
             defaults.data(forKey: Keys.hotKeys)
                 .flatMap { try? JSONDecoder().decode([String: KeyCombo].self, from: $0) }
             ?? [:]
+        hasCompletedOnboarding = defaults.bool(forKey: Keys.onboarding)
     }
 }

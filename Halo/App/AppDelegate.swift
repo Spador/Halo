@@ -1,6 +1,7 @@
 import AppKit
+import SwiftUI
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var notchController: NotchPanelController?
     private var nowPlaying: NowPlayingViewModel?
     private var shelf: ShelfViewModel?
@@ -12,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var pomodoro: PomodoroEngine?
     private var liveActivities: LiveActivityEngine?
     private var hotKeys: HotKeyCenter?
+    private var onboardingWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard let screen = NotchGeometry.preferredScreen() else { return }
@@ -110,9 +112,54 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.liveActivities = liveActivities
         self.hotKeys = hotKeys
         notchController = controller
+
+        settings.onReplayOnboardingRequested = { [weak self] in
+            self?.showOnboarding()
+        }
+        if !settings.hasCompletedOnboarding {
+            showOnboarding()
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         nowPlaying?.shutdown()
+    }
+
+    // MARK: - Onboarding window
+
+    private func showOnboarding() {
+        if let onboardingWindow {
+            onboardingWindow.makeKeyAndOrderFront(nil)
+            return
+        }
+        let view = OnboardingView(settings: .shared) { [weak self] in
+            self?.finishOnboarding()
+        }
+        let window = NSWindow(contentViewController: NSHostingController(rootView: view))
+        window.styleMask = [.titled, .closable, .fullSizeContentView]
+        window.titlebarAppearsTransparent = true
+        window.title = ""
+        // We keep the reference and drop it in windowWillClose.
+        window.isReleasedWhenClosed = false
+        window.delegate = self
+        window.center()
+        onboardingWindow = window
+        NSApplication.shared.activate()
+        window.makeKeyAndOrderFront(nil)
+    }
+
+    private func finishOnboarding() {
+        SettingsStore.shared.hasCompletedOnboarding = true
+        onboardingWindow?.close()
+    }
+
+    /// Closing the window with the red button counts as done too — the
+    /// tour must never nag on the next launch.
+    func windowWillClose(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow,
+              window === onboardingWindow
+        else { return }
+        SettingsStore.shared.hasCompletedOnboarding = true
+        onboardingWindow = nil
     }
 }
