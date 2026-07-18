@@ -32,6 +32,22 @@ xattr -dr com.apple.quarantine /Applications/Halo.app
 
 The second line clears the download quarantine. It is needed because this is a personal build that is not notarized by Apple.
 
+To stay on the version 1 line, which makes zero network connections of any kind, install the pinned cask instead:
+
+```sh
+brew install --cask spador/halo/halo@1
+xattr -dr com.apple.quarantine /Applications/Halo.app
+```
+
+Both casks install the same Halo.app, so only one can be installed at a time. To switch, uninstall one and install the other:
+
+```sh
+brew uninstall --cask halo
+brew install --cask spador/halo/halo@1
+```
+
+To update to the newest release later, run `brew upgrade --cask halo` and clear the quarantine again with the same xattr command.
+
 Manual: download the zip from [Releases](https://github.com/Spador/Halo/releases), unzip, drag Halo.app into Applications, and run the same xattr command.
 
 On first launch, grant Accessibility when asked. That powers the volume and brightness HUD replacement. Calendar access is only requested if you open the calendar page and click Connect Calendar.
