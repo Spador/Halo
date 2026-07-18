@@ -4,6 +4,7 @@ import SwiftUI
 struct NowPlayingView: View {
     let viewModel: NowPlayingViewModel
     let info: NowPlayingInfo
+    let settings: SettingsStore
 
     /// While the user drags the bar, it follows the finger instead of
     /// playback; the seek fires once on release.
@@ -27,6 +28,11 @@ struct NowPlayingView: View {
                     }
                 }
                 Spacer(minLength: 0)
+                EqualizerBars(
+                    isPlaying: info.isPlaying,
+                    color: settings.accent.color
+                )
+                .padding(.trailing, 2)
             }
 
             progressView

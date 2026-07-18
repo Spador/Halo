@@ -170,7 +170,7 @@ struct NotchShellView: View {
             ControlsPageView(viewModel: controls, settings: settings)
         case .nowPlaying:
             if let info = nowPlaying.info {
-                NowPlayingView(viewModel: nowPlaying, info: info)
+                NowPlayingView(viewModel: nowPlaying, info: info, settings: settings)
             }
         case .calendar:
             CalendarPageView(calendar: calendar)
