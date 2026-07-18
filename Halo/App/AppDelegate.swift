@@ -80,9 +80,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 if !enabled { self.quickTimer?.cancel() }
             case .pomodoro:
                 if !enabled { self.pomodoro?.reset() }
-            case .shelf, .controls, .stats, .calendar:
-                break  // Purely view-level; the shell hides them.
+            case .shelf, .controls, .scrollVolume, .stats, .calendar:
+                break  // View-level or checked at use; nothing to stop.
             }
+        }
+
+        // Scrolling over the collapsed notch adjusts the volume.
+        controller.onVolumeScroll = { [weak hud] delta in
+            guard SettingsStore.shared.isEnabled(.scrollVolume) else { return }
+            hud?.adjustVolume(by: delta)
         }
 
         // Global shortcuts jump straight to a page from any app.

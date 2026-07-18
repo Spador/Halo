@@ -45,6 +45,24 @@ final class HUDCoordinator: NSObject {
         }
     }
 
+    /// Continuous volume change from the scroll wheel, using the same
+    /// output routing as the keys (CoreAudio, else DDC monitor speakers)
+    /// and the same HUD flash. Needs no event tap, so it works even while
+    /// the HUD key feature is off or unpermitted.
+    func adjustVolume(by delta: Double) {
+        guard delta != 0 else { return }
+        if volume.canControlDefaultOutput {
+            if volume.isMuted, delta > 0 { volume.setMuted(false) }
+            let level = min(max(volume.volume + delta, 0), 1)
+            volume.setVolume(level)
+            showHUD(HUDState(kind: .volume, level: level))
+        } else if let current = brightness.externalAudioVolume() {
+            let level = min(max(current + delta, 0), 1)
+            _ = brightness.setExternalAudioVolume(level)
+            showHUD(HUDState(kind: .volume, level: level))
+        }
+    }
+
     /// Feature toggled off: release the event tap so the stock system
     /// HUDs come back instantly. The Accessibility grant itself stays.
     func stop() {

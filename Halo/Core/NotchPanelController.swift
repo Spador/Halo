@@ -7,6 +7,10 @@ import SwiftUI
 /// The window is kept exactly as small as the visible content so that when
 /// collapsed it can never swallow clicks meant for the menu bar around it.
 final class NotchPanelController: NSObject {
+    /// Scrolling over the collapsed notch, wired by the composition root
+    /// to the volume backends. Nil means the feature is unavailable.
+    var onVolumeScroll: ((Double) -> Void)?
+
     private let panel: NotchPanel
     private let viewModel = NotchViewModel()
     private let shelf: ShelfViewModel
@@ -68,6 +72,10 @@ final class NotchPanelController: NSObject {
         hoverView.onPointerEntered = { [weak self] in self?.pointerDidEnter() }
         hoverView.onPointerExited = { [weak self] in self?.pointerDidExit() }
         hoverView.onClicked = { [weak self] in self?.expand() }
+        hoverView.onScrolled = { [weak self] delta in
+            guard let self, !self.viewModel.isExpanded else { return }
+            self.onVolumeScroll?(delta)
+        }
         hoverView.isDropAllowed = { [weak self] in
             self?.settings.isEnabled(.shelf) ?? false
         }
@@ -195,7 +203,11 @@ final class NotchPanelController: NSObject {
     func showHUD(_ state: HUDState) {
         if !viewModel.isExpanded {
             shrinkTask?.cancel()
-            panel.setFrame(hudFrame, display: true)
+            // Scroll wheels fire dozens of flashes a second; skip the
+            // no-op re-frames.
+            if panel.frame != hudFrame {
+                panel.setFrame(hudFrame, display: true)
+            }
         }
         viewModel.hud = state
 

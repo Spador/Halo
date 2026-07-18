@@ -8,6 +8,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
     case shelf
     case hud
     case controls
+    case scrollVolume
     case stats
     case calendar
     case timer
@@ -21,6 +22,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .shelf: String(localized: "File shelf")
         case .hud: String(localized: "Volume and brightness HUD")
         case .controls: String(localized: "Control sliders")
+        case .scrollVolume: String(localized: "Scroll wheel volume")
         case .stats: String(localized: "System stats")
         case .calendar: String(localized: "Calendar")
         case .timer: String(localized: "Quick timers")
@@ -34,6 +36,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .shelf: "tray.fill"
         case .hud: "speaker.wave.2.fill"
         case .controls: "slider.horizontal.3"
+        case .scrollVolume: "computermouse.fill"
         case .stats: "chart.bar.fill"
         case .calendar: "calendar"
         case .timer: "timer"
@@ -52,6 +55,8 @@ enum FeatureID: String, CaseIterable, Identifiable {
             String(localized: "Replaces the system volume and brightness pop ups. Off returns the stock ones.")
         case .controls:
             String(localized: "Volume and brightness sliders in the notch panel.")
+        case .scrollVolume:
+            String(localized: "Scroll over the collapsed notch to change the volume.")
         case .stats:
             String(localized: "CPU, GPU, RAM, network, and battery readouts.")
         case .calendar:

@@ -10,6 +10,7 @@ final class HoverTrackingView: NSView {
     var onPointerEntered: () -> Void = {}
     var onPointerExited: () -> Void = {}
     var onClicked: () -> Void = {}
+    var onScrolled: (Double) -> Void = { _ in }
     /// Consulted before accepting a drag, so the shelf feature flag can
     /// refuse drops without the view knowing about settings.
     var isDropAllowed: () -> Bool = { true }
@@ -52,6 +53,22 @@ final class HoverTrackingView: NSView {
     /// clicks on inert areas (like the collapsed notch shape) bubble up the
     /// responder chain to land here.
     override func mouseDown(with event: NSEvent) { onClicked() }
+
+    /// Normalized volume delta: trackpads sweep smoothly, one mouse-wheel
+    /// notch equals one key-press step. Momentum events are dropped so a
+    /// flicked scroll doesn't keep adjusting after the fingers lift.
+    override func scrollWheel(with event: NSEvent) {
+        guard event.momentumPhase == [] else { return }
+        let delta: Double
+        if event.hasPreciseScrollingDeltas {
+            delta = event.scrollingDeltaY * 0.004
+        } else if event.scrollingDeltaY != 0 {
+            delta = event.scrollingDeltaY > 0 ? 1.0 / 16 : -1.0 / 16
+        } else {
+            return
+        }
+        onScrolled(delta)
+    }
 
     // MARK: - File drops
 
