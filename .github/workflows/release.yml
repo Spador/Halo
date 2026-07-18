@@ -1,0 +1,79 @@
+# Builds Halo and drafts a GitHub release when a version tag is pushed.
+#
+# Trigger it two ways:
+#   - Push a tag like v2.0.0  -> builds, zips, hashes, creates a DRAFT release
+#     with the zip attached. You review and click Publish on GitHub.
+#   - Run it manually from the Actions tab (workflow_dispatch) -> builds and
+#     uploads the zip as a workflow artifact only, no release. Good for
+#     checking that CI can still build the app.
+#
+# The sha256 for the Homebrew cask is printed in the run's Summary page.
+# Updating the tap (homebrew-halo) stays a manual step.
+#
+# CI builds are ad-hoc signed (no Apple team on the runner). Users clear
+# quarantine after install either way, so this changes nothing for them.
+
+name: Release build
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-26
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build Release
+        run: |
+          xcodebuild -project Halo.xcodeproj -scheme Halo -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= \
+            build
+
+      - name: Zip and hash
+        id: pack
+        run: |
+          APP="build/Build/Products/Release/Halo.app"
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="$(sed -n 's/.*MARKETING_VERSION = \([^;]*\);.*/\1/p' Halo.xcodeproj/project.pbxproj | head -1)-ci"
+          fi
+          ZIP="Halo-${VERSION}.zip"
+          ditto -c -k --keepParent "$APP" "$ZIP"
+          SHA="$(shasum -a 256 "$ZIP" | awk '{print $1}')"
+          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
+          {
+            echo "## $ZIP"
+            echo ""
+            echo "sha256 for the Homebrew cask:"
+            echo ""
+            echo '```'
+            echo "$SHA"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload artifact (manual run only)
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.pack.outputs.zip }}
+          path: ${{ steps.pack.outputs.zip }}
+
+      - name: Draft release (tag push only)
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "${{ steps.pack.outputs.zip }}" \
+            --draft \
+            --title "Halo $GITHUB_REF_NAME" \
+            --generate-notes
