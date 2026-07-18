@@ -14,8 +14,8 @@ enum Permission: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .accessibility: "Accessibility"
-        case .calendar: "Calendar"
+        case .accessibility: String(localized: "Accessibility")
+        case .calendar: String(localized: "Calendar")
         }
     }
 
@@ -30,12 +30,9 @@ enum Permission: String, CaseIterable, Identifiable {
     var explanation: String {
         switch self {
         case .accessibility:
-            "Lets Halo intercept the volume and brightness keys to replace "
-                + "the system pop ups. Ordinary typing travels on a different "
-                + "event type and never reaches Halo."
+            String(localized: "Lets Halo intercept the volume and brightness keys to replace the system pop ups. Ordinary typing travels on a different event type and never reaches Halo.")
         case .calendar:
-            "Lets the calendar page show your events. Read only, and asked "
-                + "the first time you click Connect Calendar."
+            String(localized: "Lets the calendar page show your events. Read only, and asked the first time you click Connect Calendar.")
         }
     }
 

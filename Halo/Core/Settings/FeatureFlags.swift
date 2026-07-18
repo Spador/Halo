@@ -16,13 +16,13 @@ enum FeatureID: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .nowPlaying: "Now Playing"
-        case .shelf: "File shelf"
-        case .hud: "Volume and brightness HUD"
-        case .stats: "System stats"
-        case .calendar: "Calendar"
-        case .timer: "Quick timers"
-        case .pomodoro: "Pomodoro"
+        case .nowPlaying: String(localized: "Now Playing")
+        case .shelf: String(localized: "File shelf")
+        case .hud: String(localized: "Volume and brightness HUD")
+        case .stats: String(localized: "System stats")
+        case .calendar: String(localized: "Calendar")
+        case .timer: String(localized: "Quick timers")
+        case .pomodoro: String(localized: "Pomodoro")
         }
     }
 
@@ -41,13 +41,20 @@ enum FeatureID: String, CaseIterable, Identifiable {
     /// One-line explanation shown under the toggle in Settings.
     var detail: String {
         switch self {
-        case .nowPlaying: "Media card and controls. Off also stops the helper process."
-        case .shelf: "Drop files on the notch to hold, drag out, or AirDrop them."
-        case .hud: "Replaces the system volume and brightness pop ups. Off returns the stock ones."
-        case .stats: "CPU, GPU, RAM, network, and battery readouts."
-        case .calendar: "Month view of your calendar events."
-        case .timer: "Quick countdown timers with a live activity."
-        case .pomodoro: "Focus sessions with work and break rounds."
+        case .nowPlaying:
+            String(localized: "Media card and controls. Off also stops the helper process.")
+        case .shelf:
+            String(localized: "Drop files on the notch to hold, drag out, or AirDrop them.")
+        case .hud:
+            String(localized: "Replaces the system volume and brightness pop ups. Off returns the stock ones.")
+        case .stats:
+            String(localized: "CPU, GPU, RAM, network, and battery readouts.")
+        case .calendar:
+            String(localized: "Month view of your calendar events.")
+        case .timer:
+            String(localized: "Quick countdown timers with a live activity.")
+        case .pomodoro:
+            String(localized: "Focus sessions with work and break rounds.")
         }
     }
 }

@@ -18,13 +18,13 @@ enum HotKeyAction: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .toggleNotch: "Open or close the notch"
-        case .openNowPlaying: "Open Now Playing"
-        case .openShelf: "Open the shelf"
-        case .openCalendar: "Open the calendar"
-        case .openTimer: "Open quick timers"
-        case .openPomodoro: "Open Pomodoro"
-        case .openStats: "Open system stats"
+        case .toggleNotch: String(localized: "Open or close the notch")
+        case .openNowPlaying: String(localized: "Open Now Playing")
+        case .openShelf: String(localized: "Open the shelf")
+        case .openCalendar: String(localized: "Open the calendar")
+        case .openTimer: String(localized: "Open quick timers")
+        case .openPomodoro: String(localized: "Open Pomodoro")
+        case .openStats: String(localized: "Open system stats")
         }
     }
 

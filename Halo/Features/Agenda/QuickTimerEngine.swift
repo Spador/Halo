@@ -108,7 +108,11 @@ final class QuickTimerEngine {
         NSSound(named: "Glass")?.play()
         // Brief "done" flash in the wings, then clear.
         onLiveActivityChanged(
-            LiveActivity(iconName: "checkmark.circle.fill", text: "Done", emphasized: true)
+            LiveActivity(
+                iconName: "checkmark.circle.fill",
+                text: String(localized: "Done"),
+                emphasized: true
+            )
         )
         Task { [weak self] in
             try? await Task.sleep(for: .seconds(3))

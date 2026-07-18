@@ -20,8 +20,8 @@ struct ShortcutRecorder: View {
     }
 
     private var title: String {
-        if isRecording { return "Press a shortcut..." }
-        return settings.binding(for: action)?.display ?? "Record"
+        if isRecording { return String(localized: "Press a shortcut...") }
+        return settings.binding(for: action)?.display ?? String(localized: "Record")
     }
 
     private func startRecording() {

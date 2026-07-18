@@ -15,12 +15,12 @@ enum ThemeAccent: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .teal: "Teal"
-        case .blue: "Blue"
-        case .purple: "Purple"
-        case .pink: "Pink"
-        case .green: "Green"
-        case .amber: "Amber"
+        case .teal: String(localized: "Teal")
+        case .blue: String(localized: "Blue")
+        case .purple: String(localized: "Purple")
+        case .pink: String(localized: "Pink")
+        case .green: String(localized: "Green")
+        case .amber: String(localized: "Amber")
         }
     }
 

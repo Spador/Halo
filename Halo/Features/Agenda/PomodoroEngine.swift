@@ -21,9 +21,9 @@ final class PomodoroEngine {
 
         var label: String {
             switch self {
-            case .work: return "Focus"
-            case .shortBreak: return "Break"
-            case .longBreak: return "Long break"
+            case .work: return String(localized: "Focus")
+            case .shortBreak: return String(localized: "Break")
+            case .longBreak: return String(localized: "Long break")
             }
         }
 

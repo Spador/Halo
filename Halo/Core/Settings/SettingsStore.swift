@@ -10,8 +10,8 @@ enum ExpandTrigger: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .hover: "Hover"
-        case .click: "Click"
+        case .hover: String(localized: "Hover")
+        case .click: String(localized: "Click")
         }
     }
 }
