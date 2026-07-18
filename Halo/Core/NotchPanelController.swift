@@ -10,8 +10,10 @@ final class NotchPanelController: NSObject {
     private let panel: NotchPanel
     private let viewModel = NotchViewModel()
     private let shelf: ShelfViewModel
+    private let settings: SettingsStore
     private var geometry: NotchGeometry
     private var collapseTask: Task<Void, Never>?
+    private var expandTask: Task<Void, Never>?
     private var shrinkTask: Task<Void, Never>?
     private var hudHideTask: Task<Void, Never>?
 
@@ -30,11 +32,13 @@ final class NotchPanelController: NSObject {
         stats: StatsViewModel,
         calendar: CalendarService,
         quickTimer: QuickTimerEngine,
-        pomodoro: PomodoroEngine
+        pomodoro: PomodoroEngine,
+        settings: SettingsStore = .shared
     ) {
         geometry = NotchGeometry(screen: screen)
         panel = NotchPanel(contentRect: geometry.notchRect)
         self.shelf = shelf
+        self.settings = settings
         super.init()
 
         viewModel.notchSize = geometry.notchRect.size
@@ -58,8 +62,9 @@ final class NotchPanelController: NSObject {
         hostingView.autoresizingMask = [.width, .height]
         panel.contentView = hoverView
 
-        hoverView.onPointerEntered = { [weak self] in self?.expand() }
-        hoverView.onPointerExited = { [weak self] in self?.scheduleCollapse() }
+        hoverView.onPointerEntered = { [weak self] in self?.pointerDidEnter() }
+        hoverView.onPointerExited = { [weak self] in self?.pointerDidExit() }
+        hoverView.onClicked = { [weak self] in self?.expand() }
         hoverView.onDragEntered = { [weak self] in self?.dragDidEnter() }
         hoverView.onDragExited = { [weak self] in self?.dragDidExit() }
         hoverView.onDropped = { [weak self] urls in self?.handleDrop(urls) }
@@ -77,6 +82,29 @@ final class NotchPanelController: NSObject {
         // orderFrontRegardless: show the panel even though the app never
         // becomes the active application.
         panel.orderFrontRegardless()
+    }
+
+    /// Pointer hover honors the user's trigger setting; a click (below, via
+    /// `onClicked`) and an incoming file drag always open the panel.
+    private func pointerDidEnter() {
+        collapseTask?.cancel()
+        guard settings.expandTrigger == .hover, !viewModel.isExpanded else { return }
+        expandTask?.cancel()
+        let delay = settings.hoverDelayMilliseconds
+        guard delay > 0 else {
+            expand()
+            return
+        }
+        expandTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(delay))
+            guard !Task.isCancelled else { return }
+            self?.expand()
+        }
+    }
+
+    private func pointerDidExit() {
+        expandTask?.cancel()
+        scheduleCollapse()
     }
 
     private func expand() {

@@ -9,6 +9,7 @@ import AppKit
 final class HoverTrackingView: NSView {
     var onPointerEntered: () -> Void = {}
     var onPointerExited: () -> Void = {}
+    var onClicked: () -> Void = {}
     var onDragEntered: () -> Void = {}
     var onDragExited: () -> Void = {}
     var onDropped: ([URL]) -> Void = { _ in }
@@ -43,6 +44,11 @@ final class HoverTrackingView: NSView {
 
     override func mouseEntered(with event: NSEvent) { onPointerEntered() }
     override func mouseExited(with event: NSEvent) { onPointerExited() }
+
+    /// Clicks on SwiftUI controls are consumed by the hosting view; only
+    /// clicks on inert areas (like the collapsed notch shape) bubble up the
+    /// responder chain to land here.
+    override func mouseDown(with event: NSEvent) { onClicked() }
 
     // MARK: - File drops
 
