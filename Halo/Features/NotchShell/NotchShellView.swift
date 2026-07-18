@@ -36,12 +36,16 @@ struct NotchShellView: View {
     }
 
     /// Collapsed stays pure black to blend into the physical notch; the
-    /// expanded panel picks up a faint teal wash at the bottom.
+    /// expanded panel picks up the theme's accent wash at the bottom.
     private var shapeFill: AnyShapeStyle {
         guard viewModel.isExpanded else { return AnyShapeStyle(Color.black) }
         return AnyShapeStyle(
             LinearGradient(
-                colors: [.black, Color(red: 0.015, green: 0.085, blue: 0.09)],
+                colors: Theme.panelColors(
+                    accent: settings.accent,
+                    tintStrength: settings.tintStrength,
+                    opacity: settings.panelOpacity
+                ),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -202,7 +206,11 @@ struct NotchShellView: View {
         } label: {
             Image(systemName: symbol)
                 .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(.white.opacity(activeCard == card ? 0.95 : 0.4))
+                .foregroundStyle(
+                    activeCard == card
+                        ? settings.accent.color
+                        : Color.white.opacity(0.4)
+                )
                 .frame(width: 22, height: 18)
                 .contentShape(Rectangle())
         }

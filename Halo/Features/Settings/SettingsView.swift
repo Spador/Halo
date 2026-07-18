@@ -136,6 +136,36 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Appearance") {
+                Picker("Accent color", selection: $settings.accent) {
+                    ForEach(ThemeAccent.allCases) { accent in
+                        HStack {
+                            Circle().fill(accent.color).frame(width: 10, height: 10)
+                            Text(accent.label)
+                        }
+                        .tag(accent)
+                    }
+                }
+
+                LabeledContent("Panel tint") {
+                    Slider(value: $settings.tintStrength, in: 0...1) {
+                        Text("Panel tint")
+                    }
+                    Text("\(Int(settings.tintStrength * 100))%")
+                        .monospacedDigit()
+                        .frame(width: 44, alignment: .trailing)
+                }
+
+                LabeledContent("Panel opacity") {
+                    Slider(value: $settings.panelOpacity, in: 0.75...1) {
+                        Text("Panel opacity")
+                    }
+                    Text("\(Int(settings.panelOpacity * 100))%")
+                        .monospacedDigit()
+                        .frame(width: 44, alignment: .trailing)
+                }
+            }
+
             Section("Startup") {
                 Toggle("Launch Halo at login", isOn: launchAtLoginBinding)
                 if let error = launchAtLogin.lastError {

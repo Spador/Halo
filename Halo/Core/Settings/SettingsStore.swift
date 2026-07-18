@@ -37,6 +37,25 @@ final class SettingsStore {
         didSet { defaults.set(hoverDelayMilliseconds, forKey: Keys.hoverDelay) }
     }
 
+    // MARK: - Appearance
+
+    /// Accent for the expanded panel's tint and small highlights.
+    var accent: ThemeAccent {
+        didSet { defaults.set(accent.rawValue, forKey: Keys.accent) }
+    }
+
+    /// How strong the accent wash on the panel is; 0 is pure black,
+    /// 1 matches the v1 look.
+    var tintStrength: Double {
+        didSet { defaults.set(tintStrength, forKey: Keys.tintStrength) }
+    }
+
+    /// Opacity of the expanded panel. 1 is the solid v1 look; lower lets
+    /// what's behind the panel show through faintly.
+    var panelOpacity: Double {
+        didSet { defaults.set(panelOpacity, forKey: Keys.panelOpacity) }
+    }
+
     // MARK: - Feature flags
 
     /// Features the user turned off. Stored inverted so the default —
@@ -121,6 +140,9 @@ final class SettingsStore {
     private enum Keys {
         static let expandTrigger = "settings.expandTrigger"
         static let hoverDelay = "settings.hoverDelayMilliseconds"
+        static let accent = "settings.accent"
+        static let tintStrength = "settings.tintStrength"
+        static let panelOpacity = "settings.panelOpacity"
         static let disabledFeatures = "settings.disabledFeatures"
         static let hotKeys = "settings.hotKeyBindings"
     }
@@ -132,6 +154,12 @@ final class SettingsStore {
             ?? .hover
         hoverDelayMilliseconds =
             defaults.object(forKey: Keys.hoverDelay) as? Int ?? 0
+        accent =
+            ThemeAccent(rawValue: defaults.string(forKey: Keys.accent) ?? "") ?? .teal
+        tintStrength =
+            defaults.object(forKey: Keys.tintStrength) as? Double ?? 1.0
+        panelOpacity =
+            defaults.object(forKey: Keys.panelOpacity) as? Double ?? 1.0
         disabledFeatures =
             Set(defaults.stringArray(forKey: Keys.disabledFeatures) ?? [])
         hotKeyBindings =
