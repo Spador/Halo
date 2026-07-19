@@ -59,10 +59,9 @@ struct ControlsPageView: View {
         }
     }
 
-    /// Prevents display and system sleep while on — for presentations or
-    /// long downloads. The assertion can never outlive the app.
+    /// Keep awake (sleep assertion) and the Focus chip share one row.
     private var keepAwakeRow: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 10) {
             Image(systemName: "cup.and.saucer.fill")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(
@@ -74,11 +73,54 @@ struct ControlsPageView: View {
             Text("Keep awake")
                 .font(.system(size: 12))
                 .foregroundStyle(.white.opacity(0.85))
-            Spacer()
             Toggle("", isOn: keepAwakeBinding)
                 .toggleStyle(.switch)
                 .controlSize(.mini)
                 .labelsHidden()
+            Spacer()
+            focusChip
+        }
+    }
+
+    /// Runs the user's "Halo Focus" shortcut. Orange means the shortcut
+    /// is missing; the question mark opens Shortcuts to create it.
+    private var focusChip: some View {
+        HStack(spacing: 6) {
+            Button {
+                viewModel.focus.toggle()
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: "moon.fill")
+                        .font(.system(size: 10, weight: .semibold))
+                    Text(viewModel.focus.needsSetup
+                        ? String(localized: "Set up Focus")
+                        : String(localized: "Focus"))
+                        .font(.system(size: 11, weight: .semibold))
+                }
+                .foregroundStyle(
+                    viewModel.focus.needsSetup
+                        ? AnyShapeStyle(Color.orange)
+                        : AnyShapeStyle(.white.opacity(0.85))
+                )
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(Capsule().fill(.white.opacity(0.12)))
+            }
+            .buttonStyle(.plain)
+            .opacity(viewModel.focus.isRunning ? 0.5 : 1)
+            .help("Toggles Do Not Disturb by running your \"Halo Focus\" shortcut")
+
+            if viewModel.focus.needsSetup {
+                Button {
+                    viewModel.focus.openShortcutsApp()
+                } label: {
+                    Image(systemName: "questionmark.circle")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.white.opacity(0.5))
+                }
+                .buttonStyle(.plain)
+                .help("In Shortcuts: add a \"Set Focus\" action set to toggle Do Not Disturb, and name the shortcut \"Halo Focus\"")
+            }
         }
     }
 

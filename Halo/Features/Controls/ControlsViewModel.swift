@@ -20,8 +20,9 @@ final class ControlsViewModel {
     private(set) var outputDevices: [AudioOutputDevice] = []
     private(set) var currentOutputID: AudioDeviceID?
 
-    /// Observable itself, so views track its state directly.
+    /// Observable themselves, so views track their state directly.
     let keepAwake = KeepAwake()
+    let focus = FocusToggle()
 
     @ObservationIgnored private let volume: VolumeControl
     @ObservationIgnored private let displays: DisplayBrightnessManager
