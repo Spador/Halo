@@ -14,6 +14,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var liveActivities: LiveActivityEngine?
     private var hotKeys: HotKeyCenter?
     private var clipboard: ClipboardHistory?
+    private var screenshots: ScreenshotWatcher?
     private var onboardingWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -73,6 +74,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if settings.isEnabled(.hud) { hud.start() }
         if settings.isEnabled(.clipboard) { clipboard.start() }
 
+        // New screenshots land on the shelf.
+        let screenshots = ScreenshotWatcher()
+        screenshots.onScreenshot = { [weak shelf] url in
+            shelf?.add([url])
+        }
+        if settings.isEnabled(.screenshots) { screenshots.start() }
+
         // React to toggles flipped in Settings while the app runs.
         settings.onFeatureChanged = { [weak self] feature, enabled in
             guard let self else { return }
@@ -83,6 +91,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 enabled ? self.hud?.start() : self.hud?.stop()
             case .clipboard:
                 enabled ? self.clipboard?.start() : self.clipboard?.stop()
+            case .screenshots:
+                enabled ? self.screenshots?.start() : self.screenshots?.stop()
             case .timer:
                 // Turning the page off cancels a running countdown so its
                 // live activity doesn't linger in the wings.
@@ -144,6 +154,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         self.liveActivities = liveActivities
         self.hotKeys = hotKeys
         self.clipboard = clipboard
+        self.screenshots = screenshots
         notchController = controller
         // The stream may have delivered before the engine reference was
         // stored above; publish once to catch up.
