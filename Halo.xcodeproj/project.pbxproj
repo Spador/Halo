@@ -275,7 +275,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Halo shows your upcoming calendar events in the notch. Events never leave this Mac.";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Halo shows your upcoming calendar events in the notch. Events never leave this Mac."; INFOPLIST_KEY_NSCameraUsageDescription = "Halo shows your camera only on the mirror page, and only while that page is open."; INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "Halo shows and completes your reminders on its to-do page. They never leave this Mac.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -307,7 +307,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Halo shows your upcoming calendar events in the notch. Events never leave this Mac.";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Halo shows your upcoming calendar events in the notch. Events never leave this Mac."; INFOPLIST_KEY_NSCameraUsageDescription = "Halo shows your camera only on the mirror page, and only while that page is open."; INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "Halo shows and completes your reminders on its to-do page. They never leave this Mac.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

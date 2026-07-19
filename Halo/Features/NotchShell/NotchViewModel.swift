@@ -14,6 +14,7 @@ enum NotchCard {
     case mirror
     case calendar
     case worldClock
+    case todos
     case timer
     case pomodoro
     case stats

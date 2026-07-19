@@ -39,6 +39,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let colorPicker = ColorPickerStore()
         let worldClock = WorldClockStore()
         let mirror = CameraMirror()
+        let todos = RemindersService()
         let controller = NotchPanelController(
             screen: screen,
             nowPlaying: nowPlaying,
@@ -49,6 +50,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             colorPicker: colorPicker,
             worldClock: worldClock,
             mirror: mirror,
+            todos: todos,
             stats: stats,
             calendar: calendar,
             quickTimer: quickTimer,
@@ -131,7 +133,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 // Re-evaluate with the flag's new value.
                 self.publishMediaActivity(self.nowPlaying?.info)
             case .shelf, .controls, .scrollVolume, .gestures, .colorPicker,
-                .mirror, .worldClock, .stats, .calendar:
+                .mirror, .worldClock, .todos, .stats, .calendar:
                 break  // View-level or checked at use; nothing to stop.
             }
         }

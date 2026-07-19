@@ -11,6 +11,7 @@ enum Permission: String, CaseIterable, Identifiable {
     case accessibility
     case calendar
     case camera
+    case reminders
 
     var id: String { rawValue }
 
@@ -19,6 +20,7 @@ enum Permission: String, CaseIterable, Identifiable {
         case .accessibility: String(localized: "Accessibility")
         case .calendar: String(localized: "Calendar")
         case .camera: String(localized: "Camera")
+        case .reminders: String(localized: "Reminders")
         }
     }
 
@@ -27,6 +29,7 @@ enum Permission: String, CaseIterable, Identifiable {
         case .accessibility: "accessibility"
         case .calendar: "calendar"
         case .camera: "camera"
+        case .reminders: "checklist"
         }
     }
 
@@ -39,6 +42,8 @@ enum Permission: String, CaseIterable, Identifiable {
             String(localized: "Lets the calendar page show your events. Read only, and asked the first time you click Connect Calendar.")
         case .camera:
             String(localized: "Powers the mirror page. The camera runs only while that page is open, and nothing is ever recorded.")
+        case .reminders:
+            String(localized: "Lets the to-do page show, add, and complete your reminders. Asked the first time you click Connect Reminders.")
         }
     }
 
@@ -49,6 +54,7 @@ enum Permission: String, CaseIterable, Identifiable {
         case .accessibility: return URL(string: "\(base)?Privacy_Accessibility")
         case .calendar: return URL(string: "\(base)?Privacy_Calendars")
         case .camera: return URL(string: "\(base)?Privacy_Camera")
+        case .reminders: return URL(string: "\(base)?Privacy_Reminders")
         }
     }
 }
@@ -112,6 +118,12 @@ final class PermissionsManager: NSObject {
             case .notDetermined: .notDetermined
             default: .denied
             }
+        statuses[.reminders] =
+            switch EKEventStore.authorizationStatus(for: .reminder) {
+            case .fullAccess: .granted
+            case .notDetermined: .notDetermined
+            default: .denied
+            }
     }
 
     /// Shows the system prompt. The completion runs when the user answers —
@@ -147,6 +159,14 @@ final class PermissionsManager: NSObject {
                 guard let self else { return }
                 self.refresh()
                 completion(self.status(of: .camera))
+            }
+
+        case .reminders:
+            Task { [weak self] in
+                _ = try? await self?.eventStore.requestFullAccessToReminders()
+                guard let self else { return }
+                self.refresh()
+                completion(self.status(of: .reminders))
             }
         }
     }
