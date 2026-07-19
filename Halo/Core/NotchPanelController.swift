@@ -11,6 +11,9 @@ final class NotchPanelController: NSObject {
     /// to the volume backends. Nil means the feature is unavailable.
     var onVolumeScroll: ((Double) -> Void)?
 
+    /// Horizontal swipe over the collapsed notch; true means next track.
+    var onTrackSwipe: ((Bool) -> Void)?
+
     private let panel: NotchPanel
     private let viewModel = NotchViewModel()
     private let shelf: ShelfViewModel
@@ -75,6 +78,22 @@ final class NotchPanelController: NSObject {
         hoverView.onScrolled = { [weak self] delta in
             guard let self, !self.viewModel.isExpanded else { return }
             self.onVolumeScroll?(delta)
+        }
+        hoverView.onSwiped = { [weak self] direction in
+            guard let self, !self.viewModel.isExpanded,
+                  self.settings.isEnabled(.gestures)
+            else { return }
+            // Content follows the fingers: swiping left pushes to the
+            // next track.
+            self.onTrackSwipe?(direction == .left)
+        }
+        hoverView.onPinched = { [weak self] pinchedOut in
+            guard let self, self.settings.isEnabled(.gestures) else { return }
+            if pinchedOut {
+                self.expand()
+            } else if self.viewModel.isExpanded {
+                self.collapse()
+            }
         }
         hoverView.isDropAllowed = { [weak self] in
             self?.settings.isEnabled(.shelf) ?? false

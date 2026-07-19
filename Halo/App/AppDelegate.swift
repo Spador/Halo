@@ -86,7 +86,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             case .mediaActivity:
                 // Re-evaluate with the flag's new value.
                 self.publishMediaActivity(self.nowPlaying?.info)
-            case .shelf, .controls, .scrollVolume, .stats, .calendar:
+            case .shelf, .controls, .scrollVolume, .gestures, .stats, .calendar:
                 break  // View-level or checked at use; nothing to stop.
             }
         }
@@ -95,6 +95,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         controller.onVolumeScroll = { [weak hud] delta in
             guard SettingsStore.shared.isEnabled(.scrollVolume) else { return }
             hud?.adjustVolume(by: delta)
+        }
+
+        // Horizontal swipes over the collapsed notch skip tracks.
+        controller.onTrackSwipe = { [weak nowPlaying] next in
+            next ? nowPlaying?.nextTrack() : nowPlaying?.previousTrack()
         }
 
         // Global shortcuts jump straight to a page from any app.
