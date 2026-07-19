@@ -4,6 +4,7 @@ import SwiftUI
 /// event dots), the selected day's events on the right.
 struct CalendarPageView: View {
     let calendar: CalendarService
+    let meetings: MeetingCountdown
 
     @State private var displayedMonth = Date()
     @State private var selectedDay = Date()
@@ -37,15 +38,48 @@ struct CalendarPageView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
         case .authorized:
-            HStack(alignment: .top, spacing: 18) {
-                monthGrid.frame(width: 220)
-                dayPanel.frame(maxWidth: .infinity, alignment: .topLeading)
+            VStack(spacing: 4) {
+                if let meeting = meetings.current {
+                    meetingBanner(meeting)
+                }
+                HStack(alignment: .top, spacing: 18) {
+                    monthGrid.frame(width: 220)
+                    dayPanel.frame(maxWidth: .infinity, alignment: .topLeading)
+                }
             }
             .padding(.horizontal, 24)
             .onAppear { reloadMonth(); reloadDay() }
             .onChange(of: displayedMonth) { reloadMonth() }
             .onChange(of: selectedDay) { reloadDay() }
             .onChange(of: calendar.revision) { reloadMonth(); reloadDay() }
+        }
+    }
+
+    /// One line about the next meeting, with Join when a link was found.
+    private func meetingBanner(_ meeting: UpcomingMeeting) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: "video.fill")
+                .font(.system(size: 10))
+                .foregroundStyle(.white.opacity(0.6))
+            Text(meeting.title)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.85))
+                .lineLimit(1)
+            Text(meeting.start, style: .relative)
+                .font(.system(size: 10))
+                .foregroundStyle(.white.opacity(0.45))
+            Spacer(minLength: 8)
+            if let url = meeting.joinURL {
+                Button("Join") {
+                    NSWorkspace.shared.open(url)
+                }
+                .buttonStyle(.plain)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 3)
+                .background(Capsule().fill(.white.opacity(0.15)))
+            }
         }
     }
 

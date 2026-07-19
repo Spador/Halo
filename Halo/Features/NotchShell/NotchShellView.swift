@@ -9,6 +9,7 @@ struct NotchShellView: View {
     let shelf: ShelfViewModel
     let controls: ControlsViewModel
     let clipboard: ClipboardHistory
+    let meetings: MeetingCountdown
     let stats: StatsViewModel
     let calendar: CalendarService
     let quickTimer: QuickTimerEngine
@@ -194,7 +195,7 @@ struct NotchShellView: View {
                 NowPlayingView(viewModel: nowPlaying, info: info, settings: settings)
             }
         case .calendar:
-            CalendarPageView(calendar: calendar)
+            CalendarPageView(calendar: calendar, meetings: meetings)
         case .timer:
             TimerPageView(engine: quickTimer)
         case .pomodoro:

@@ -15,6 +15,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
     case screenshots
     case stats
     case calendar
+    case meetings
     case timer
     case pomodoro
 
@@ -42,6 +43,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .screenshots: String(localized: "Screenshots to shelf")
         case .stats: String(localized: "System stats")
         case .calendar: String(localized: "Calendar")
+        case .meetings: String(localized: "Meeting countdown")
         case .timer: String(localized: "Quick timers")
         case .pomodoro: String(localized: "Pomodoro")
         }
@@ -60,6 +62,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .screenshots: "camera.viewfinder"
         case .stats: "chart.bar.fill"
         case .calendar: "calendar"
+        case .meetings: "video.fill"
         case .timer: "timer"
         case .pomodoro: "brain.head.profile"
         }
@@ -90,6 +93,8 @@ enum FeatureID: String, CaseIterable, Identifiable {
             String(localized: "CPU, GPU, RAM, network, and battery readouts.")
         case .calendar:
             String(localized: "Month view of your calendar events.")
+        case .meetings:
+            String(localized: "Counts down to your next meeting in the wings, with a join link.")
         case .timer:
             String(localized: "Quick countdown timers with a live activity.")
         case .pomodoro:

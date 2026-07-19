@@ -28,9 +28,11 @@ struct LiveActivityView: View {
                     if first.activity.isMedia {
                         artwork(first, size: 20)
                     } else {
-                        Image(systemName: first.activity.iconName)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(tint(first))
+                        linked(first) {
+                            Image(systemName: first.activity.iconName)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(tint(first))
+                        }
                     }
                 } else {
                     compact(first)
@@ -57,17 +59,40 @@ struct LiveActivityView: View {
                         framesPerSecond: 10
                     )
                 } else {
-                    Text(first.activity.text)
-                        .font(.system(size: 12, weight: .semibold).monospacedDigit())
-                        .foregroundStyle(tint(first))
+                    linked(first) {
+                        Text(first.activity.text)
+                            .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                            .foregroundStyle(tint(first))
+                    }
                 }
             }
         }
         .frame(width: NotchViewModel.hudWingWidth)
     }
 
+    /// Wraps wing content in a click-to-open button when the activity
+    /// carries a link (meeting join). Plain content otherwise.
+    @ViewBuilder
+    private func linked<Content: View>(
+        _ item: LiveActivityItem,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        if let url = item.activity.url {
+            Button {
+                NSWorkspace.shared.open(url)
+            } label: {
+                content().contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("Join the meeting")
+        } else {
+            content()
+        }
+    }
+
     @ViewBuilder
     private func compact(_ item: LiveActivityItem) -> some View {
+        linked(item) {
         HStack(spacing: 4) {
             if item.activity.isMedia {
                 artwork(item, size: 16)
@@ -90,6 +115,7 @@ struct LiveActivityView: View {
         }
         .foregroundStyle(tint(item))
         .frame(width: NotchViewModel.hudWingWidth)
+        }
     }
 
     private func artwork(_ item: LiveActivityItem, size: CGFloat) -> some View {

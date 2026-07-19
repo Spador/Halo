@@ -6,6 +6,7 @@ import Foundation
 /// media in v2.0).
 enum LiveActivitySource: Int, CaseIterable {
     case recording
+    case meeting
     case quickTimer
     case pomodoro
     case transfer

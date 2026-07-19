@@ -15,6 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var hotKeys: HotKeyCenter?
     private var clipboard: ClipboardHistory?
     private var screenshots: ScreenshotWatcher?
+    private var meetings: MeetingCountdown?
     private var onboardingWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -33,12 +34,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let displays = DisplayBrightnessManager()
         let controls = ControlsViewModel(volume: volume, displays: displays)
         let clipboard = ClipboardHistory()
+        let meetings = MeetingCountdown(calendar: calendar)
         let controller = NotchPanelController(
             screen: screen,
             nowPlaying: nowPlaying,
             shelf: shelf,
             controls: controls,
             clipboard: clipboard,
+            meetings: meetings,
             stats: stats,
             calendar: calendar,
             quickTimer: quickTimer,
@@ -61,6 +64,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         nowPlaying.onInfoChanged = { [weak self] info in
             self?.publishMediaActivity(info)
         }
+        meetings.onLiveActivityChanged = { [weak liveActivities] activity in
+            liveActivities?.publish(activity, from: .meeting)
+        }
+        calendar.onChanged = { [weak meetings] in
+            meetings?.refresh()
+        }
+        meetings.refresh()
 
         let hud = HUDCoordinator(volume: volume, brightness: displays) {
             [weak controller] state in
@@ -93,6 +103,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 enabled ? self.clipboard?.start() : self.clipboard?.stop()
             case .screenshots:
                 enabled ? self.screenshots?.start() : self.screenshots?.stop()
+            case .meetings:
+                enabled ? self.meetings?.refresh() : self.meetings?.stop()
             case .timer:
                 // Turning the page off cancels a running countdown so its
                 // live activity doesn't linger in the wings.
@@ -161,6 +173,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         self.hotKeys = hotKeys
         self.clipboard = clipboard
         self.screenshots = screenshots
+        self.meetings = meetings
         notchController = controller
         // The stream may have delivered before the engine reference was
         // stored above; publish once to catch up.

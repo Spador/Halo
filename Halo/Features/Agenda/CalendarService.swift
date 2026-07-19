@@ -11,6 +11,13 @@ struct AgendaEvent: Identifiable, Equatable {
     let isAllDay: Bool
 }
 
+/// The next timed event, with any video-call link found in its fields.
+struct UpcomingMeeting: Equatable {
+    let title: String
+    let start: Date
+    let joinURL: URL?
+}
+
 /// Calendar data via EventKit. Access is requested only when the user
 /// clicks "Connect Calendar" — never at launch — and views re-query when
 /// EventKit announces that any calendar changed (`revision` bumps).
@@ -26,6 +33,10 @@ final class CalendarService: NSObject {
     /// Bumped on every calendar-database change; views observe it and
     /// re-run their queries.
     private(set) var revision = 0
+
+    /// Non-view listeners (the meeting countdown) that must react to
+    /// database changes outside SwiftUI's observation.
+    @ObservationIgnored var onChanged: (() -> Void)?
 
     @ObservationIgnored private let store = EKEventStore()
 
@@ -47,11 +58,13 @@ final class CalendarService: NSObject {
             guard let self else { return }
             self.authState = Self.currentAuthState()
             self.revision += 1
+            self.onChanged?()
         }
     }
 
     @objc private func storeChanged() {
         revision += 1
+        onChanged?()
     }
 
     /// All events on the given day, all-day events first.
@@ -86,6 +99,46 @@ final class CalendarService: NSObject {
                     isAllDay: event.isAllDay
                 )
             }
+    }
+
+    /// The next timed event starting within the window — or started less
+    /// than five minutes ago, so a just-begun meeting still counts.
+    func nextMeeting(withinHours hours: Double = 12) -> UpcomingMeeting? {
+        guard authState == .authorized else { return nil }
+        let now = Date()
+        let windowStart = now.addingTimeInterval(-5 * 60)
+        let predicate = store.predicateForEvents(
+            withStart: windowStart,
+            end: now.addingTimeInterval(hours * 3600),
+            calendars: nil
+        )
+        let next = store.events(matching: predicate)
+            .filter { !$0.isAllDay && $0.startDate > windowStart }
+            .min { $0.startDate < $1.startDate }
+        guard let next else { return nil }
+        return UpcomingMeeting(
+            title: next.title ?? String(localized: "Meeting"),
+            start: next.startDate,
+            joinURL: Self.joinLink(in: next)
+        )
+    }
+
+    /// Zoom and Meet links hide in different fields depending on who
+    /// created the invite; check them all.
+    private static func joinLink(in event: EKEvent) -> URL? {
+        var haystacks: [String] = []
+        if let url = event.url?.absoluteString { haystacks.append(url) }
+        if let location = event.location { haystacks.append(location) }
+        if let notes = event.notes { haystacks.append(notes) }
+
+        let pattern = #"https://[^\s<>"']*(zoom\.us|meet\.google\.com)[^\s<>"']*"#
+        for text in haystacks {
+            if let range = text.range(of: pattern, options: .regularExpression),
+               let url = URL(string: String(text[range])) {
+                return url
+            }
+        }
+        return nil
     }
 
     private static func currentAuthState() -> AuthState {

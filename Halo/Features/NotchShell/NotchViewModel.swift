@@ -26,6 +26,8 @@ struct LiveActivity: Equatable {
     /// text. Nil artwork falls back to the icon.
     var artwork: NSImage?
     var isMedia: Bool = false
+    /// When set, clicking the wing opens this (meeting join links).
+    var url: URL?
 }
 
 /// State shared between the panel controller (AppKit side) and the SwiftUI
