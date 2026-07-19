@@ -14,12 +14,18 @@ Halo lives around the notch. Hover over it and it expands into a hub for media c
 
 ## Features
 
-- Notch overlay that expands on hover with smooth spring animations
-- Now Playing: album art, track info, play, pause and skip. Works with Apple Music, Spotify, and media playing in a browser tab. The card background is built from the current album art
+- Notch overlay that expands on hover or click, with a configurable hover delay and smooth spring animations
+- Now Playing: album art, track info, play, pause, skip, seek by dragging the progress bar, an animated equalizer, and a like button for players that report like support. Works with Apple Music, Spotify, and media playing in a browser tab. The card background is built from the current album art
+- Music in the wings: mini artwork and a small equalizer beside the notch while music plays
 - File shelf: drag files onto the notch to hold them, drag them back out into any app, send them via AirDrop, and pin the ones you want to keep across restarts
 - Custom volume and brightness HUDs that replace the system pop ups, including monitor speaker volume over DDC for DisplayPort and HDMI audio, which macOS itself cannot control
+- Control sliders card: volume and brightness by mouse, plus a picker that switches the audio output device
+- Scroll over the collapsed notch to change volume, swipe sideways to skip tracks, pinch to open and close the panel
+- Several live activities at once: running timers and music share the wings, most urgent first
 - System stats: CPU, GPU, RAM and network readouts, battery with a charging flash in the notch, and AirPods battery
 - Calendar page with a month grid and per day events, quick timers with a completion ring, and a full Pomodoro timer with configurable rounds. Running timers stay visible in the collapsed notch
+- Settings window: every feature has an on and off toggle, plus accent color and tint themes, global keyboard shortcuts that open any page from anywhere, launch at login, and a live view of permissions
+- A short welcome tour on first launch
 
 ## Install (no Xcode needed)
 
@@ -50,7 +56,7 @@ To update to the newest release later, run `brew upgrade --cask halo` and clear 
 
 Manual: download the zip from [Releases](https://github.com/Spador/Halo/releases), unzip, drag Halo.app into Applications, and run the same xattr command.
 
-On first launch, grant Accessibility when asked. That powers the volume and brightness HUD replacement. Calendar access is only requested if you open the calendar page and click Connect Calendar.
+On first launch, grant Accessibility when asked. That powers the volume and brightness HUD replacement. Calendar access is only requested if you open the calendar page and click Connect Calendar. Everything else works with no permissions at all: global shortcuts, sliders, the output picker, gestures, and scroll volume all use permission free system APIs.
 
 ## Principles
 

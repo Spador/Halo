@@ -18,7 +18,12 @@ struct OnboardingPage: Identifiable {
         OnboardingPage(
             icon: "cursorarrow.rays",
             title: String(localized: "Open the notch"),
-            body: String(localized: "Move the pointer onto the notch and the panel opens. Prefer a click, a delay, or a keyboard shortcut? All of that lives in Settings.")
+            body: String(localized: "Move the pointer onto the notch and the panel opens. Prefer a click, a pinch, a delay, or a keyboard shortcut? All of that lives in Settings.")
+        ),
+        OnboardingPage(
+            icon: "slider.horizontal.3",
+            title: String(localized: "Quick controls"),
+            body: String(localized: "Scroll over the notch to change volume and swipe sideways to skip tracks. The sliders card adjusts volume and brightness by mouse and switches the audio output.")
         ),
         OnboardingPage(
             icon: "tray.and.arrow.down.fill",
