@@ -17,7 +17,10 @@ Halo lives around the notch. Hover over it and it expands into a hub for media c
 - Notch overlay that expands on hover or click, with a configurable hover delay and smooth spring animations
 - Now Playing: album art, track info, play, pause, skip, seek by dragging the progress bar, an animated equalizer, and a like button for players that report like support. Works with Apple Music, Spotify, and media playing in a browser tab. The card background is built from the current album art
 - Music in the wings: mini artwork and a small equalizer beside the notch while music plays
-- File shelf: drag files onto the notch to hold them, drag them back out into any app, send them via AirDrop, and pin the ones you want to keep across restarts
+- File shelf: drag files onto the notch to hold them, drag them back out into any app, send them via AirDrop, and pin the ones you want to keep across restarts. Select several tiles and drag them out as one group
+- Shelf quick actions: compress files or folders to zip, convert images to PNG or JPEG, and rename, all from the right click menu. Results land back on the shelf
+- New screenshots land on the shelf automatically, wherever your screenshot folder lives
+- Clipboard history page with search, click to copy, and pins. Off by default. History stays in memory and dies with the app; only pinned entries persist. Entries marked concealed or transient, the convention password managers use, are never captured
 - Custom volume and brightness HUDs that replace the system pop ups, including monitor speaker volume over DDC for DisplayPort and HDMI audio, which macOS itself cannot control
 - Control sliders card: volume and brightness by mouse, plus a picker that switches the audio output device
 - Scroll over the collapsed notch to change volume, swipe sideways to skip tracks, pinch to open and close the panel
@@ -67,7 +70,9 @@ On first launch, grant Accessibility when asked. That powers the volume and brig
 
 ## Privacy and permissions
 
-Halo makes zero network connections. Nothing you play, hold, or schedule ever leaves the machine. The only data written to disk is the list of pinned shelf file paths and your Pomodoro durations, both in the app preferences.
+Halo makes zero network connections. Nothing you play, hold, copy, or schedule ever leaves the machine. The only data written to disk lives in the app preferences: pinned shelf file paths, pinned clipboard entries, your settings, and your Pomodoro durations.
+
+The clipboard history feature is off by default. When enabled it checks the pasteboard change counter once per second (macOS offers no notification for this), keeps captured text in memory only, and never captures entries that password managers mark concealed or transient. Clear removes everything except your pins.
 
 | Permission | When asked | Why | Scope |
 |---|---|---|---|
