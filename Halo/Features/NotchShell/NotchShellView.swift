@@ -12,6 +12,7 @@ struct NotchShellView: View {
     let meetings: MeetingCountdown
     let colorPicker: ColorPickerStore
     let worldClock: WorldClockStore
+    let mirror: CameraMirror
     let stats: StatsViewModel
     let calendar: CalendarService
     let quickTimer: QuickTimerEngine
@@ -138,8 +139,8 @@ struct NotchShellView: View {
             case .shelf: if shelf.hasItems { return .shelf }
             case .nowPlaying: if nowPlaying.info != nil { return .nowPlaying }
             // Always-available pages honor the choice unconditionally.
-            case .controls, .clipboard, .colorPicker, .calendar, .worldClock,
-                .timer, .pomodoro, .stats:
+            case .controls, .clipboard, .colorPicker, .mirror, .calendar,
+                .worldClock, .timer, .pomodoro, .stats:
                 return selected
             }
         }
@@ -169,6 +170,7 @@ struct NotchShellView: View {
         if enabled(.controls) { cards.append((.controls, "slider.horizontal.3")) }
         if enabled(.clipboard) { cards.append((.clipboard, "doc.on.clipboard")) }
         if enabled(.colorPicker) { cards.append((.colorPicker, "eyedropper")) }
+        if enabled(.mirror) { cards.append((.mirror, "web.camera")) }
         return cards
     }
 
@@ -197,6 +199,8 @@ struct NotchShellView: View {
             ClipboardPageView(history: clipboard, settings: settings)
         case .colorPicker:
             ColorPickerPageView(store: colorPicker, settings: settings)
+        case .mirror:
+            MirrorPageView(mirror: mirror, settings: settings)
         case .nowPlaying:
             if let info = nowPlaying.info {
                 NowPlayingView(viewModel: nowPlaying, info: info, settings: settings)
@@ -229,7 +233,7 @@ struct NotchShellView: View {
         if viewModel.isExpanded,
            leadingCards.count + trailingCards.count > 1,
            !cards.isEmpty {
-            HStack(spacing: 5) {
+            HStack(spacing: 3) {
                 ForEach(cards, id: \.card) { entry in
                     cardButton(entry.card, symbol: entry.symbol)
                 }
@@ -251,7 +255,7 @@ struct NotchShellView: View {
                         ? settings.accent.color
                         : Color.white.opacity(0.4)
                 )
-                .frame(width: 22, height: 18)
+                .frame(width: 19, height: 18)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

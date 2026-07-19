@@ -13,6 +13,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
     case mediaActivity
     case clipboard
     case colorPicker
+    case mirror
     case screenshots
     case sensors
     case stats
@@ -44,6 +45,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .mediaActivity: String(localized: "Music in the wings")
         case .clipboard: String(localized: "Clipboard history")
         case .colorPicker: String(localized: "Color picker")
+        case .mirror: String(localized: "Camera mirror")
         case .screenshots: String(localized: "Screenshots to shelf")
         case .sensors: String(localized: "Mic and camera indicator")
         case .stats: String(localized: "System stats")
@@ -66,6 +68,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .mediaActivity: "waveform"
         case .clipboard: "doc.on.clipboard"
         case .colorPicker: "eyedropper"
+        case .mirror: "web.camera"
         case .screenshots: "camera.viewfinder"
         case .sensors: "mic.fill"
         case .stats: "chart.bar.fill"
@@ -98,6 +101,8 @@ enum FeatureID: String, CaseIterable, Identifiable {
             String(localized: "Keeps recent copied text, in memory only. Off by default; password manager entries are never captured.")
         case .colorPicker:
             String(localized: "Pick any color on screen with the system loupe; recent picks stay as swatches.")
+        case .mirror:
+            String(localized: "Quick webcam check before a call. The camera runs only while the page is open.")
         case .screenshots:
             String(localized: "New screenshots land on the shelf automatically.")
         case .sensors:
@@ -127,6 +132,7 @@ extension NotchCard {
         case .controls: .controls
         case .clipboard: .clipboard
         case .colorPicker: .colorPicker
+        case .mirror: .mirror
         case .calendar: .calendar
         case .worldClock: .worldClock
         case .timer: .timer

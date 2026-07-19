@@ -11,6 +11,7 @@ enum NotchCard {
     case controls
     case clipboard
     case colorPicker
+    case mirror
     case calendar
     case worldClock
     case timer

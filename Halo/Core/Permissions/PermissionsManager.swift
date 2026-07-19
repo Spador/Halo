@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import AVFoundation
 import EventKit
 import Observation
 
@@ -9,6 +10,7 @@ import Observation
 enum Permission: String, CaseIterable, Identifiable {
     case accessibility
     case calendar
+    case camera
 
     var id: String { rawValue }
 
@@ -16,6 +18,7 @@ enum Permission: String, CaseIterable, Identifiable {
         switch self {
         case .accessibility: String(localized: "Accessibility")
         case .calendar: String(localized: "Calendar")
+        case .camera: String(localized: "Camera")
         }
     }
 
@@ -23,6 +26,7 @@ enum Permission: String, CaseIterable, Identifiable {
         switch self {
         case .accessibility: "accessibility"
         case .calendar: "calendar"
+        case .camera: "camera"
         }
     }
 
@@ -33,6 +37,8 @@ enum Permission: String, CaseIterable, Identifiable {
             String(localized: "Lets Halo intercept the volume and brightness keys to replace the system pop ups. Ordinary typing travels on a different event type and never reaches Halo.")
         case .calendar:
             String(localized: "Lets the calendar page show your events. Read only, and asked the first time you click Connect Calendar.")
+        case .camera:
+            String(localized: "Powers the mirror page. The camera runs only while that page is open, and nothing is ever recorded.")
         }
     }
 
@@ -42,6 +48,7 @@ enum Permission: String, CaseIterable, Identifiable {
         switch self {
         case .accessibility: return URL(string: "\(base)?Privacy_Accessibility")
         case .calendar: return URL(string: "\(base)?Privacy_Calendars")
+        case .camera: return URL(string: "\(base)?Privacy_Camera")
         }
     }
 }
@@ -99,6 +106,12 @@ final class PermissionsManager: NSObject {
             case .notDetermined: .notDetermined
             default: .denied
             }
+        statuses[.camera] =
+            switch AVCaptureDevice.authorizationStatus(for: .video) {
+            case .authorized: .granted
+            case .notDetermined: .notDetermined
+            default: .denied
+            }
     }
 
     /// Shows the system prompt. The completion runs when the user answers —
@@ -126,6 +139,14 @@ final class PermissionsManager: NSObject {
                 guard let self else { return }
                 self.refresh()
                 completion(self.status(of: .calendar))
+            }
+
+        case .camera:
+            Task { [weak self] in
+                _ = await AVCaptureDevice.requestAccess(for: .video)
+                guard let self else { return }
+                self.refresh()
+                completion(self.status(of: .camera))
             }
         }
     }

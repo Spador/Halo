@@ -38,6 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let meetings = MeetingCountdown(calendar: calendar)
         let colorPicker = ColorPickerStore()
         let worldClock = WorldClockStore()
+        let mirror = CameraMirror()
         let controller = NotchPanelController(
             screen: screen,
             nowPlaying: nowPlaying,
@@ -47,6 +48,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             meetings: meetings,
             colorPicker: colorPicker,
             worldClock: worldClock,
+            mirror: mirror,
             stats: stats,
             calendar: calendar,
             quickTimer: quickTimer,
@@ -129,7 +131,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 // Re-evaluate with the flag's new value.
                 self.publishMediaActivity(self.nowPlaying?.info)
             case .shelf, .controls, .scrollVolume, .gestures, .colorPicker,
-                .worldClock, .stats, .calendar:
+                .mirror, .worldClock, .stats, .calendar:
                 break  // View-level or checked at use; nothing to stop.
             }
         }
