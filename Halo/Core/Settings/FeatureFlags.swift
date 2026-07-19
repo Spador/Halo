@@ -17,6 +17,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
     case sensors
     case stats
     case calendar
+    case worldClock
     case meetings
     case timer
     case pomodoro
@@ -47,6 +48,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .sensors: String(localized: "Mic and camera indicator")
         case .stats: String(localized: "System stats")
         case .calendar: String(localized: "Calendar")
+        case .worldClock: String(localized: "World clock")
         case .meetings: String(localized: "Meeting countdown")
         case .timer: String(localized: "Quick timers")
         case .pomodoro: String(localized: "Pomodoro")
@@ -68,6 +70,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .sensors: "mic.fill"
         case .stats: "chart.bar.fill"
         case .calendar: "calendar"
+        case .worldClock: "globe"
         case .meetings: "video.fill"
         case .timer: "timer"
         case .pomodoro: "brain.head.profile"
@@ -103,6 +106,8 @@ enum FeatureID: String, CaseIterable, Identifiable {
             String(localized: "CPU, GPU, RAM, network, and battery readouts.")
         case .calendar:
             String(localized: "Month view of your calendar events.")
+        case .worldClock:
+            String(localized: "Your cities and their local times, at a glance.")
         case .meetings:
             String(localized: "Counts down to your next meeting in the wings, with a join link.")
         case .timer:
@@ -123,6 +128,7 @@ extension NotchCard {
         case .clipboard: .clipboard
         case .colorPicker: .colorPicker
         case .calendar: .calendar
+        case .worldClock: .worldClock
         case .timer: .timer
         case .pomodoro: .pomodoro
         case .stats: .stats

@@ -11,6 +11,7 @@ struct NotchShellView: View {
     let clipboard: ClipboardHistory
     let meetings: MeetingCountdown
     let colorPicker: ColorPickerStore
+    let worldClock: WorldClockStore
     let stats: StatsViewModel
     let calendar: CalendarService
     let quickTimer: QuickTimerEngine
@@ -137,8 +138,8 @@ struct NotchShellView: View {
             case .shelf: if shelf.hasItems { return .shelf }
             case .nowPlaying: if nowPlaying.info != nil { return .nowPlaying }
             // Always-available pages honor the choice unconditionally.
-            case .controls, .clipboard, .colorPicker, .calendar, .timer, .pomodoro,
-                .stats:
+            case .controls, .clipboard, .colorPicker, .calendar, .worldClock,
+                .timer, .pomodoro, .stats:
                 return selected
             }
         }
@@ -174,6 +175,7 @@ struct NotchShellView: View {
     private var trailingCards: [(card: NotchCard, symbol: String)] {
         var cards: [(NotchCard, String)] = []
         if enabled(.calendar) { cards.append((.calendar, "calendar")) }
+        if enabled(.worldClock) { cards.append((.worldClock, "globe")) }
         if enabled(.timer) { cards.append((.timer, "timer")) }
         if enabled(.pomodoro) { cards.append((.pomodoro, "brain.head.profile")) }
         if enabled(.stats) { cards.append((.stats, "chart.bar.fill")) }
@@ -201,6 +203,8 @@ struct NotchShellView: View {
             }
         case .calendar:
             CalendarPageView(calendar: calendar, meetings: meetings)
+        case .worldClock:
+            WorldClockPageView(store: worldClock, settings: settings)
         case .timer:
             TimerPageView(engine: quickTimer)
         case .pomodoro:

@@ -12,6 +12,7 @@ enum NotchCard {
     case clipboard
     case colorPicker
     case calendar
+    case worldClock
     case timer
     case pomodoro
     case stats
