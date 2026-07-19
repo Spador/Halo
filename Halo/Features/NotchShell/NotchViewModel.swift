@@ -8,6 +8,7 @@ enum NotchCard {
     case nowPlaying
     case shelf
     case controls
+    case clipboard
     case calendar
     case timer
     case pomodoro

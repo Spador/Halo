@@ -10,6 +10,7 @@ enum HotKeyAction: String, CaseIterable, Identifiable {
     case openNowPlaying
     case openShelf
     case openControls
+    case openClipboard
     case openCalendar
     case openTimer
     case openPomodoro
@@ -23,6 +24,7 @@ enum HotKeyAction: String, CaseIterable, Identifiable {
         case .openNowPlaying: String(localized: "Open Now Playing")
         case .openShelf: String(localized: "Open the shelf")
         case .openControls: String(localized: "Open control sliders")
+        case .openClipboard: String(localized: "Open clipboard history")
         case .openCalendar: String(localized: "Open the calendar")
         case .openTimer: String(localized: "Open quick timers")
         case .openPomodoro: String(localized: "Open Pomodoro")
@@ -37,6 +39,7 @@ enum HotKeyAction: String, CaseIterable, Identifiable {
         case .openNowPlaying: .nowPlaying
         case .openShelf: .shelf
         case .openControls: .controls
+        case .openClipboard: .clipboard
         case .openCalendar: .calendar
         case .openTimer: .timer
         case .openPomodoro: .pomodoro

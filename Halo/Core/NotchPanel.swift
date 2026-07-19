@@ -30,8 +30,11 @@ final class NotchPanel: NSPanel {
         ]
     }
 
-    // Refusing key/main status guarantees a click on the overlay never
-    // deactivates whatever app the user is working in.
-    override var canBecomeKey: Bool { false }
+    // Key status is allowed so text fields (clipboard search) can take
+    // typing focus — but because the panel is nonactivating, that never
+    // activates Halo or deactivates the app the user is working in, and
+    // AppKit only hands a panel key status for views that need typing.
+    // Main status stays refused.
+    override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 }

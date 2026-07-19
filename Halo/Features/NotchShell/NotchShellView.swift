@@ -8,6 +8,7 @@ struct NotchShellView: View {
     let nowPlaying: NowPlayingViewModel
     let shelf: ShelfViewModel
     let controls: ControlsViewModel
+    let clipboard: ClipboardHistory
     let stats: StatsViewModel
     let calendar: CalendarService
     let quickTimer: QuickTimerEngine
@@ -133,7 +134,8 @@ struct NotchShellView: View {
             case .shelf: if shelf.hasItems { return .shelf }
             case .nowPlaying: if nowPlaying.info != nil { return .nowPlaying }
             // Always-available pages honor the choice unconditionally.
-            case .controls, .calendar, .timer, .pomodoro, .stats: return selected
+            case .controls, .clipboard, .calendar, .timer, .pomodoro, .stats:
+                return selected
             }
         }
         if enabled(.shelf), shelf.hasItems { return .shelf }
@@ -142,7 +144,8 @@ struct NotchShellView: View {
         if enabled(.pomodoro), pomodoro.session != nil { return .pomodoro }
         if enabled(.stats) { return .stats }
         // Stats is off too: fall back to any page that is still on.
-        return [NotchCard.controls, .calendar, .timer, .pomodoro].first { enabled($0.feature) }
+        return [NotchCard.controls, .clipboard, .calendar, .timer, .pomodoro]
+            .first { enabled($0.feature) }
     }
 
     /// Cards worth offering in the switcher (enabled pages always are).
@@ -155,6 +158,7 @@ struct NotchShellView: View {
             cards.append((.shelf, "tray.fill"))
         }
         if enabled(.controls) { cards.append((.controls, "slider.horizontal.3")) }
+        if enabled(.clipboard) { cards.append((.clipboard, "doc.on.clipboard")) }
         if enabled(.calendar) { cards.append((.calendar, "calendar")) }
         if enabled(.timer) { cards.append((.timer, "timer")) }
         if enabled(.pomodoro) { cards.append((.pomodoro, "brain.head.profile")) }
@@ -169,6 +173,8 @@ struct NotchShellView: View {
             ShelfView(viewModel: shelf, isDropTargeted: viewModel.isDropTargeted)
         case .controls:
             ControlsPageView(viewModel: controls, settings: settings)
+        case .clipboard:
+            ClipboardPageView(history: clipboard, settings: settings)
         case .nowPlaying:
             if let info = nowPlaying.info {
                 NowPlayingView(viewModel: nowPlaying, info: info, settings: settings)

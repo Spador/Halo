@@ -13,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var pomodoro: PomodoroEngine?
     private var liveActivities: LiveActivityEngine?
     private var hotKeys: HotKeyCenter?
+    private var clipboard: ClipboardHistory?
     private var onboardingWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -30,11 +31,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let volume = VolumeControl()
         let displays = DisplayBrightnessManager()
         let controls = ControlsViewModel(volume: volume, displays: displays)
+        let clipboard = ClipboardHistory()
         let controller = NotchPanelController(
             screen: screen,
             nowPlaying: nowPlaying,
             shelf: shelf,
             controls: controls,
+            clipboard: clipboard,
             stats: stats,
             calendar: calendar,
             quickTimer: quickTimer,
@@ -68,6 +71,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Services behind a feature flag only run while the flag is on.
         if settings.isEnabled(.nowPlaying) { nowPlaying.start() }
         if settings.isEnabled(.hud) { hud.start() }
+        if settings.isEnabled(.clipboard) { clipboard.start() }
 
         // React to toggles flipped in Settings while the app runs.
         settings.onFeatureChanged = { [weak self] feature, enabled in
@@ -77,6 +81,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 enabled ? self.nowPlaying?.start() : self.nowPlaying?.shutdown()
             case .hud:
                 enabled ? self.hud?.start() : self.hud?.stop()
+            case .clipboard:
+                enabled ? self.clipboard?.start() : self.clipboard?.stop()
             case .timer:
                 // Turning the page off cancels a running countdown so its
                 // live activity doesn't linger in the wings.
@@ -137,6 +143,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         self.pomodoro = pomodoro
         self.liveActivities = liveActivities
         self.hotKeys = hotKeys
+        self.clipboard = clipboard
         notchController = controller
         // The stream may have delivered before the engine reference was
         // stored above; publish once to catch up.

@@ -11,12 +11,22 @@ enum FeatureID: String, CaseIterable, Identifiable {
     case scrollVolume
     case gestures
     case mediaActivity
+    case clipboard
     case stats
     case calendar
     case timer
     case pomodoro
 
     var id: String { rawValue }
+
+    /// Most features ship on. Privacy-sensitive ones ship off and wait for
+    /// an explicit opt-in in Settings.
+    var enabledByDefault: Bool {
+        switch self {
+        case .clipboard: false
+        default: true
+        }
+    }
 
     var label: String {
         switch self {
@@ -27,6 +37,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .scrollVolume: String(localized: "Scroll wheel volume")
         case .gestures: String(localized: "Trackpad gestures")
         case .mediaActivity: String(localized: "Music in the wings")
+        case .clipboard: String(localized: "Clipboard history")
         case .stats: String(localized: "System stats")
         case .calendar: String(localized: "Calendar")
         case .timer: String(localized: "Quick timers")
@@ -43,6 +54,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .scrollVolume: "computermouse.fill"
         case .gestures: "hand.draw.fill"
         case .mediaActivity: "waveform"
+        case .clipboard: "doc.on.clipboard"
         case .stats: "chart.bar.fill"
         case .calendar: "calendar"
         case .timer: "timer"
@@ -67,6 +79,8 @@ enum FeatureID: String, CaseIterable, Identifiable {
             String(localized: "Swipe on the notch to skip tracks; pinch to open and close.")
         case .mediaActivity:
             String(localized: "Mini artwork and equalizer beside the notch while music plays.")
+        case .clipboard:
+            String(localized: "Keeps recent copied text, in memory only. Off by default; password manager entries are never captured.")
         case .stats:
             String(localized: "CPU, GPU, RAM, network, and battery readouts.")
         case .calendar:
@@ -86,6 +100,7 @@ extension NotchCard {
         case .nowPlaying: .nowPlaying
         case .shelf: .shelf
         case .controls: .controls
+        case .clipboard: .clipboard
         case .calendar: .calendar
         case .timer: .timer
         case .pomodoro: .pomodoro

@@ -74,12 +74,10 @@ final class SettingsStore {
 
     // MARK: - Feature flags
 
-    /// Features the user turned off. Stored inverted so the default —
-    /// an absent key — means everything is on.
-    private var disabledFeatures: Set<String> {
-        didSet {
-            defaults.set(Array(disabledFeatures).sorted(), forKey: Keys.disabledFeatures)
-        }
+    /// Explicit user choices only; an absent key means the feature's own
+    /// registry default (most ship on, privacy-sensitive ones ship off).
+    private var featureOverrides: [String: Bool] {
+        didSet { defaults.set(featureOverrides, forKey: Keys.featureOverrides) }
     }
 
     /// The composition root (AppDelegate) hooks this to start and stop the
@@ -87,16 +85,12 @@ final class SettingsStore {
     @ObservationIgnored var onFeatureChanged: ((FeatureID, Bool) -> Void)?
 
     func isEnabled(_ feature: FeatureID) -> Bool {
-        !disabledFeatures.contains(feature.rawValue)
+        featureOverrides[feature.rawValue] ?? feature.enabledByDefault
     }
 
     func setEnabled(_ feature: FeatureID, _ enabled: Bool) {
-        guard enabled == disabledFeatures.contains(feature.rawValue) else { return }
-        if enabled {
-            disabledFeatures.remove(feature.rawValue)
-        } else {
-            disabledFeatures.insert(feature.rawValue)
-        }
+        guard enabled != isEnabled(feature) else { return }
+        featureOverrides[feature.rawValue] = enabled
         onFeatureChanged?(feature, enabled)
     }
 
@@ -159,7 +153,8 @@ final class SettingsStore {
         static let accent = "settings.accent"
         static let tintStrength = "settings.tintStrength"
         static let panelOpacity = "settings.panelOpacity"
-        static let disabledFeatures = "settings.disabledFeatures"
+        static let disabledFeatures = "settings.disabledFeatures"  // legacy
+        static let featureOverrides = "settings.featureOverrides"
         static let hotKeys = "settings.hotKeyBindings"
         static let onboarding = "settings.onboardingCompleted"
     }
@@ -177,8 +172,14 @@ final class SettingsStore {
             defaults.object(forKey: Keys.tintStrength) as? Double ?? 1.0
         panelOpacity =
             defaults.object(forKey: Keys.panelOpacity) as? Double ?? 1.0
-        disabledFeatures =
-            Set(defaults.stringArray(forKey: Keys.disabledFeatures) ?? [])
+        var overrides =
+            defaults.dictionary(forKey: Keys.featureOverrides) as? [String: Bool] ?? [:]
+        // Migrate the v2.0 format (a plain list of disabled features).
+        if let legacy = defaults.stringArray(forKey: Keys.disabledFeatures) {
+            for raw in legacy { overrides[raw] = false }
+            defaults.removeObject(forKey: Keys.disabledFeatures)
+        }
+        featureOverrides = overrides
         hotKeyBindings =
             defaults.data(forKey: Keys.hotKeys)
                 .flatMap { try? JSONDecoder().decode([String: KeyCombo].self, from: $0) }
