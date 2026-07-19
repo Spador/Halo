@@ -37,12 +37,35 @@ struct NowPlayingView: View {
 
             progressView
 
-            HStack(spacing: 28) {
-                controlButton("backward.fill") { viewModel.previousTrack() }
-                controlButton(info.isPlaying ? "pause.fill" : "play.fill", size: 22) {
-                    viewModel.togglePlayPause()
+            ZStack {
+                HStack(spacing: 28) {
+                    controlButton("backward.fill") { viewModel.previousTrack() }
+                    controlButton(info.isPlaying ? "pause.fill" : "play.fill", size: 22) {
+                        viewModel.togglePlayPause()
+                    }
+                    controlButton("forward.fill") { viewModel.nextTrack() }
                 }
-                controlButton("forward.fill") { viewModel.nextTrack() }
+                // Only sources that report like support get the heart
+                // (Apple Music yes; Spotify and browsers generally no).
+                if info.supportsLike {
+                    HStack {
+                        Spacer()
+                        Button {
+                            viewModel.toggleLike()
+                        } label: {
+                            Image(systemName: info.isLiked == true ? "heart.fill" : "heart")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(
+                                    info.isLiked == true
+                                        ? AnyShapeStyle(settings.accent.color)
+                                        : AnyShapeStyle(.white.opacity(0.6))
+                                )
+                                .frame(width: 30, height: 30)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
             }
         }
         .padding(.horizontal, 22)

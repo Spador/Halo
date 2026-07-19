@@ -10,6 +10,12 @@ struct NowPlayingInfo {
     var artwork: NSImage?
     var appBundleID: String?
 
+    /// Whether the source says the current track is liked/favorited, and
+    /// whether it supports liking at all. Apple Music reports both; Spotify
+    /// and browsers generally do not, which hides the heart button.
+    var isLiked: Bool?
+    var supportsLike: Bool = false
+
     /// Total track length in seconds, if the source reports one.
     var duration: TimeInterval?
     /// Elapsed playback time in seconds — but only as of `elapsedCapturedAt`.
@@ -37,4 +43,5 @@ enum MediaCommand: Int {
     case togglePlayPause = 2
     case nextTrack = 4
     case previousTrack = 5
+    case likeTrack = 0x6A
 }

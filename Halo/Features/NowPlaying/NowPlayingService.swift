@@ -148,6 +148,8 @@ final class NowPlayingService {
             var elapsedTimeMicros: Int64?
             var timestampEpochMicros: Int64?
             var artworkData: String?
+            var isLiked: Bool?
+            var supportsIsLiked: Bool?
         }
     }
 
@@ -175,6 +177,8 @@ final class NowPlayingService {
             isPlaying: payload.playing ?? false,
             artwork: artwork,
             appBundleID: payload.bundleIdentifier,
+            isLiked: payload.isLiked,
+            supportsLike: payload.supportsIsLiked ?? false,
             duration: payload.durationMicros.map { Double($0) / micros },
             elapsed: payload.elapsedTimeMicros.map { Double($0) / micros },
             elapsedCapturedAt: payload.timestampEpochMicros.map {

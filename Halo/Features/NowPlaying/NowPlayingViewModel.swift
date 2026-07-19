@@ -44,6 +44,13 @@ final class NowPlayingViewModel {
     func nextTrack() { service.send(.nextTrack) }
     func previousTrack() { service.send(.previousTrack) }
 
+    /// Likes/favorites the current track in the source app. Optimistic:
+    /// the heart fills instantly, the stream confirms (or corrects).
+    func toggleLike() {
+        service.send(.likeTrack)
+        info?.isLiked = !(info?.isLiked ?? false)
+    }
+
     /// Jumps to an absolute position (progress bar drag). Optimistic like
     /// play/pause: the bar moves instantly, the stream confirms shortly.
     func seek(to seconds: TimeInterval) {
