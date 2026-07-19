@@ -36,6 +36,9 @@
     "%lld ms" : {
 
     },
+    "%lld selected" : {
+
+    },
     "%lld%%" : {
 
     },
@@ -114,7 +117,13 @@
     "Delete" : {
 
     },
+    "Deselect" : {
+
+    },
     "Done" : {
+
+    },
+    "Drag %lld files" : {
 
     },
     "Drag files onto the notch to keep them handy. Drag them back out anywhere, send them over AirDrop, or pin the ones you use often." : {

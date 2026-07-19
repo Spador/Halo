@@ -7,6 +7,8 @@ import Observation
 @Observable
 final class ShelfViewModel {
     private(set) var items: [ShelfItem] = []
+    /// Tiles picked for a group drag (item ids, which are file paths).
+    private(set) var selectedIDs: Set<String> = []
 
     @ObservationIgnored private let defaults = UserDefaults.standard
     private static let pinnedPathsKey = "shelf.pinnedPaths"
@@ -30,7 +32,23 @@ final class ShelfViewModel {
 
     func remove(_ item: ShelfItem) {
         items.removeAll { $0.id == item.id }
+        selectedIDs.remove(item.id)
         persistPinned()
+    }
+
+    // MARK: - Group selection
+
+    func toggleSelection(_ item: ShelfItem) {
+        selectedIDs.formSymmetricDifference([item.id])
+    }
+
+    func clearSelection() {
+        selectedIDs = []
+    }
+
+    /// Selected file URLs in shelf order, for the group drag.
+    var selectedURLs: [URL] {
+        items.filter { selectedIDs.contains($0.id) }.map(\.url)
     }
 
     func togglePin(_ item: ShelfItem) {
@@ -41,6 +59,7 @@ final class ShelfViewModel {
 
     func clearUnpinned() {
         items.removeAll { !$0.isPinned }
+        selectedIDs.formIntersection(items.map(\.id))
     }
 
     func airDrop(_ item: ShelfItem) {

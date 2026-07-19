@@ -4,6 +4,7 @@ import SwiftUI
 /// or a drop prompt while empty.
 struct ShelfView: View {
     let viewModel: ShelfViewModel
+    let settings: SettingsStore
     let isDropTargeted: Bool
 
     var body: some View {
@@ -15,7 +16,11 @@ struct ShelfView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(viewModel.items) { item in
-                            ShelfTileView(item: item, viewModel: viewModel)
+                            ShelfTileView(
+                                item: item,
+                                viewModel: viewModel,
+                                settings: settings
+                            )
                         }
                     }
                     .padding(.horizontal, 18)
@@ -26,16 +31,44 @@ struct ShelfView: View {
 
     private var header: some View {
         HStack {
-            Text("\(viewModel.items.count) file\(viewModel.items.count == 1 ? "" : "s")")
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(.white.opacity(0.5))
-            Spacer()
-            Button("Clear") { viewModel.clearUnpinned() }
-                .buttonStyle(.plain)
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(.white.opacity(0.5))
+            if viewModel.selectedIDs.count >= 2 {
+                Text("\(viewModel.selectedIDs.count) selected")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.5))
+                Spacer()
+                groupDragChip
+                Button("Deselect") { viewModel.clearSelection() }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.5))
+            } else {
+                Text("\(viewModel.items.count) file\(viewModel.items.count == 1 ? "" : "s")")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.5))
+                Spacer()
+                Button("Clear") { viewModel.clearUnpinned() }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.5))
+            }
         }
         .padding(.horizontal, 20)
+    }
+
+    /// Grab this chip and drag: all selected files travel as one group.
+    /// The invisible overlay is the AppKit drag source.
+    private var groupDragChip: some View {
+        Label("Drag \(viewModel.selectedIDs.count) files", systemImage: "square.stack.3d.up.fill")
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundStyle(settings.accent.color)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(Capsule().fill(.white.opacity(0.12)))
+            .overlay {
+                GroupDragHandle(urls: viewModel.selectedURLs) {
+                    viewModel.clearSelection()
+                }
+            }
     }
 
     private var dropPrompt: some View {
@@ -61,8 +94,13 @@ struct ShelfView: View {
 struct ShelfTileView: View {
     let item: ShelfItem
     let viewModel: ShelfViewModel
+    let settings: SettingsStore
 
     @State private var isHovering = false
+
+    private var isSelected: Bool {
+        viewModel.selectedIDs.contains(item.id)
+    }
 
     var body: some View {
         VStack(spacing: 5) {
@@ -89,9 +127,16 @@ struct ShelfTileView: View {
         .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(.white.opacity(isHovering ? 0.08 : 0))
+                .fill(.white.opacity(isHovering ? 0.08 : isSelected ? 0.05 : 0))
         )
+        .overlay {
+            if isSelected {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(settings.accent.color.opacity(0.8), lineWidth: 1.5)
+            }
+        }
         .onHover { isHovering = $0 }
+        .onTapGesture { viewModel.toggleSelection(item) }
         .onDrag { NSItemProvider(contentsOf: item.url) ?? NSItemProvider() }
         .contextMenu {
             Button(item.isPinned ? "Unpin" : "Pin") { viewModel.togglePin(item) }

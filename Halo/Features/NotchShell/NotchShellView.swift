@@ -170,7 +170,11 @@ struct NotchShellView: View {
     private var expandedContent: some View {
         switch activeCard {
         case .shelf:
-            ShelfView(viewModel: shelf, isDropTargeted: viewModel.isDropTargeted)
+            ShelfView(
+                viewModel: shelf,
+                settings: settings,
+                isDropTargeted: viewModel.isDropTargeted
+            )
         case .controls:
             ControlsPageView(viewModel: controls, settings: settings)
         case .clipboard:
