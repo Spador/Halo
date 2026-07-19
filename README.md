@@ -25,6 +25,8 @@ Halo lives around the notch. Hover over it and it expands into a hub for media c
 - Control sliders card: volume, built in display brightness, external monitor brightness over DDC, and keyboard backlight, all by mouse, plus a picker that switches the audio output device, a keep awake toggle, and a Focus toggle that runs your Halo Focus shortcut
 - Scroll over the collapsed notch to change volume, swipe sideways to skip tracks, pinch to open and close the panel
 - Several live activities at once: running timers and music share the wings, most urgent first
+- Meeting countdown: ten minutes before your next calendar event the wings start counting down, green in the last minute. Click the wing (or the Join button on the calendar page) to open the event's Zoom or Meet link
+- Mic and camera indicator: whenever any app uses the microphone or camera, the wings show an orange mic or green camera with elapsed time, like the iPhone's privacy indicator
 - System stats: CPU, GPU, RAM and network readouts, and a two line battery section with health and cycle count, time to full while charging, connected accessory batteries, a green charging flash in the notch, and a red flash when the battery sinks through 20 and 10 percent
 - Calendar page with a month grid and per day events, quick timers with a completion ring, and a full Pomodoro timer with configurable rounds. Running timers stay visible in the collapsed notch
 - Settings window: every feature has an on and off toggle, plus accent color and tint themes, global keyboard shortcuts that open any page from anywhere, launch at login, and a live view of permissions
@@ -93,6 +95,8 @@ The app is not sandboxed. Spawning the media helper and the interfaces above req
 - Brightness keys cannot be intercepted on current macOS builds: the system consumes them before any event tap, at any level, sees them (verified by logging every event reaching the tap). Built in display brightness keys therefore show the stock macOS pop up, not Halo's. Volume keys are unaffected
 - External monitor brightness works through the slider on the controls card, over DDC. Capability is verified per monitor at discovery: Halo nudges the level by one percent, reads it back, and restores it, retrying if the monitor's DDC bus is busy. Some monitors block DDC brightness while an energy saving or auto brightness mode is active in their own menu
 - The HUD feature needs the Accessibility permission. Quit Halo and your keys instantly revert to stock macOS behavior
+- Notification mirroring was considered and deliberately skipped: reading other apps' notifications needs either Full Disk Access or scraping Notification Center's accessibility tree, and either way it could only duplicate banners macOS is already showing
+- Screen recording as such is not detectable with public API; the mic and camera indicator catches recordings indirectly through the microphone most of them capture. AirDrop transfer progress is similarly not exposed by the system
 
 ## Requirements
 
