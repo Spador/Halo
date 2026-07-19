@@ -22,10 +22,10 @@ Halo lives around the notch. Hover over it and it expands into a hub for media c
 - New screenshots land on the shelf automatically, wherever your screenshot folder lives
 - Clipboard history page with search, click to copy, and pins. Off by default. History stays in memory and dies with the app; only pinned entries persist. Entries marked concealed or transient, the convention password managers use, are never captured
 - Custom volume and brightness HUDs that replace the system pop ups, including monitor speaker volume over DDC for DisplayPort and HDMI audio, which macOS itself cannot control
-- Control sliders card: volume and brightness by mouse, plus a picker that switches the audio output device
+- Control sliders card: volume, built in display brightness, external monitor brightness over DDC, and keyboard backlight, all by mouse, plus a picker that switches the audio output device, a keep awake toggle, and a Focus toggle that runs your Halo Focus shortcut
 - Scroll over the collapsed notch to change volume, swipe sideways to skip tracks, pinch to open and close the panel
 - Several live activities at once: running timers and music share the wings, most urgent first
-- System stats: CPU, GPU, RAM and network readouts, battery with a charging flash in the notch, and AirPods battery
+- System stats: CPU, GPU, RAM and network readouts, and a two line battery section with health and cycle count, time to full while charging, connected accessory batteries, a green charging flash in the notch, and a red flash when the battery sinks through 20 and 10 percent
 - Calendar page with a month grid and per day events, quick timers with a completion ring, and a full Pomodoro timer with configurable rounds. Running timers stay visible in the collapsed notch
 - Settings window: every feature has an on and off toggle, plus accent color and tint themes, global keyboard shortcuts that open any page from anywhere, launch at login, and a live view of permissions
 - A short welcome tour on first launch
