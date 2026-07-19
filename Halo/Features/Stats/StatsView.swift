@@ -58,28 +58,54 @@ struct StatsView: View {
         }
     }
 
+    /// Battery gets two lines: the Mac itself, then connected accessories
+    /// on their own scrollable line so any number of devices fits.
     private func batteryRow(accessories: [AccessoryBattery]) -> some View {
-        HStack(spacing: 8) {
-            rowLabel("BAT")
-            if let battery = viewModel.battery.status {
-                Image(systemName: battery.isCharging ? "bolt.fill" : "battery.75percent")
-                    .font(.system(size: 9))
-                    .foregroundStyle(battery.isCharging ? .green : .white.opacity(0.8))
-                Text("\(battery.percent)%")
-                    .font(.system(size: 10).monospacedDigit())
-                    .foregroundStyle(.white.opacity(0.8))
-            } else {
-                Text("–")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.white.opacity(0.5))
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 8) {
+                rowLabel("BAT")
+                if let battery = viewModel.battery.status {
+                    Image(systemName: battery.isCharging ? "bolt.fill" : "battery.75percent")
+                        .font(.system(size: 9))
+                        .foregroundStyle(battery.isCharging ? .green : .white.opacity(0.8))
+                    Text("\(battery.percent)%")
+                        .font(.system(size: 10).monospacedDigit())
+                        .foregroundStyle(.white.opacity(0.8))
+                    if let minutes = battery.timeToFullMinutes {
+                        Text("· \(minutes / 60):\(String(format: "%02d", minutes % 60)) to full")
+                            .font(.system(size: 10).monospacedDigit())
+                            .foregroundStyle(.green.opacity(0.8))
+                    }
+                    if let health = viewModel.battery.healthPercent {
+                        Text("· health \(health)%\(viewModel.battery.cycleCount.map { ", \($0) cycles" } ?? "")")
+                            .font(.system(size: 10).monospacedDigit())
+                            .foregroundStyle(.white.opacity(0.45))
+                            .lineLimit(1)
+                    }
+                } else {
+                    Text("–")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.white.opacity(0.5))
+                }
+                Spacer(minLength: 0)
             }
-            ForEach(accessories.prefix(2)) { accessory in
-                Text("· \(accessory.name) \(accessory.percent)%")
-                    .font(.system(size: 10).monospacedDigit())
-                    .foregroundStyle(.white.opacity(0.6))
-                    .lineLimit(1)
+
+            if !accessories.isEmpty {
+                HStack(spacing: 8) {
+                    rowLabel("EXT")
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(accessories) { accessory in
+                                Text("\(accessory.name) \(accessory.percent)%")
+                                    .font(.system(size: 10).monospacedDigit())
+                                    .foregroundStyle(.white.opacity(0.6))
+                                    .lineLimit(1)
+                                    .fixedSize()
+                            }
+                        }
+                    }
+                }
             }
-            Spacer(minLength: 0)
         }
     }
 

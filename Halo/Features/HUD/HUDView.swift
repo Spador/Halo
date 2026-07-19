@@ -8,9 +8,14 @@ struct HUDView: View {
 
     private let barWidth: CGFloat = 58
 
-    /// Charging flashes are green; volume/brightness stay white.
+    /// Charging flashes green, low-battery warns red; volume and
+    /// brightness stay white.
     private var tint: Color {
-        state.kind == .battery ? .green : .white
+        switch state.kind {
+        case .battery: .green
+        case .batteryLow: .red
+        case .volume, .brightness: .white
+        }
     }
 
     var body: some View {

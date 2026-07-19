@@ -137,10 +137,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             recording ? hotKeys.suspend() : hotKeys.resume()
         }
 
-        // Plugging in the charger flashes a green battery HUD in the wings.
+        // Plugging in the charger flashes a green battery HUD in the wings;
+        // sinking through 20 and 10 percent flashes a red warning.
         battery.onChargingBegan = { [weak controller] status in
             controller?.showHUD(
                 HUDState(kind: .battery, level: Double(status.percent) / 100)
+            )
+        }
+        battery.onLowBattery = { [weak controller] status in
+            controller?.showHUD(
+                HUDState(kind: .batteryLow, level: Double(status.percent) / 100)
             )
         }
 

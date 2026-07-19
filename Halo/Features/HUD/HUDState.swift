@@ -5,7 +5,8 @@ struct HUDState: Equatable {
     enum Kind {
         case volume
         case brightness
-        case battery   // charger-connected flash
+        case battery      // charger-connected flash (green)
+        case batteryLow   // low-battery warning flash (red)
     }
 
     var kind: Kind
@@ -20,6 +21,8 @@ struct HUDState: Equatable {
         switch kind {
         case .battery:
             return "bolt.fill"
+        case .batteryLow:
+            return "battery.25percent"
         case .brightness:
             return "sun.max.fill"
         case .volume:
