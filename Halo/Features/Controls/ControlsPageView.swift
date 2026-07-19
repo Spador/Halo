@@ -7,7 +7,7 @@ struct ControlsPageView: View {
     let settings: SettingsStore
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 10) {
             slider(
                 icon: "speaker.wave.2.fill",
                 level: viewModel.volumeLevel,
@@ -33,6 +33,16 @@ struct ControlsPageView: View {
                     onChange: { viewModel.setExternalBrightness($0) }
                 )
             }
+            // Keyboard backlight, when the private client is available.
+            if viewModel.backlightAvailable {
+                slider(
+                    icon: "keyboard",
+                    level: viewModel.backlightLevel,
+                    available: true,
+                    unavailableHint: "",
+                    onChange: { viewModel.setBacklight($0) }
+                )
+            }
             outputPicker
             keepAwakeRow
         }
@@ -55,7 +65,7 @@ struct ControlsPageView: View {
                     }
                 }
             }
-            .frame(maxHeight: 44)
+            .frame(maxHeight: 32)
         }
     }
 

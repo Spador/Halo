@@ -83,7 +83,8 @@ Halo uses three private or undocumented API surfaces, listed in the open. Each f
 
 - MediaRemote, through the vendored [mediaremote-adapter](Vendor/README.md), for system wide Now Playing info. Apple locked the direct route in macOS 15.4
 - DisplayServices, for setting the built in display brightness. No public API exists for this
-- IOAVService (DDC/CI), a standard control channel to external monitors, used for speaker volume and, when enabled, brightness
+- IOAVService (DDC/CI), a standard control channel to external monitors, used for speaker volume and brightness
+- CoreBrightness (KeyboardBrightnessClient), for the keyboard backlight slider. No public API exists; the control otherwise lives only in Control Center
 
 The app is not sandboxed. Spawning the media helper and the interfaces above require that. It requests no unusual entitlements.
 

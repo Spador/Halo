@@ -17,6 +17,8 @@ final class ControlsViewModel {
     /// since current macOS hides brightness keys from event taps.
     private(set) var externalBrightnessLevel: Double = 0
     private(set) var externalBrightnessAvailable = false
+    private(set) var backlightLevel: Double = 0
+    private(set) var backlightAvailable = false
     private(set) var outputDevices: [AudioOutputDevice] = []
     private(set) var currentOutputID: AudioDeviceID?
 
@@ -27,6 +29,7 @@ final class ControlsViewModel {
     @ObservationIgnored private let volume: VolumeControl
     @ObservationIgnored private let displays: DisplayBrightnessManager
     @ObservationIgnored private let audioDevices = AudioOutputDevices()
+    @ObservationIgnored private let backlight = KeyboardBacklight()
 
     init(volume: VolumeControl, displays: DisplayBrightnessManager) {
         self.volume = volume
@@ -60,8 +63,21 @@ final class ControlsViewModel {
             externalBrightnessAvailable = false
         }
 
+        if let level = backlight.brightness() {
+            backlightAvailable = true
+            backlightLevel = level
+        } else {
+            backlightAvailable = false
+        }
+
         outputDevices = audioDevices.list()
         currentOutputID = audioDevices.defaultDeviceID()
+    }
+
+    func setBacklight(_ level: Double) {
+        let clamped = min(max(level, 0), 1)
+        backlightLevel = clamped
+        backlight.setBrightness(clamped)
     }
 
     func setExternalBrightness(_ level: Double) {
