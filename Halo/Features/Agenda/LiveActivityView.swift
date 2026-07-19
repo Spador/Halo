@@ -135,6 +135,6 @@ struct LiveActivityView: View {
     }
 
     private func tint(_ item: LiveActivityItem) -> Color {
-        item.activity.emphasized ? .green : .white
+        item.activity.color ?? (item.activity.emphasized ? .green : .white)
     }
 }

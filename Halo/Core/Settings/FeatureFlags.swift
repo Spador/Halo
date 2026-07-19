@@ -13,6 +13,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
     case mediaActivity
     case clipboard
     case screenshots
+    case sensors
     case stats
     case calendar
     case meetings
@@ -41,6 +42,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .mediaActivity: String(localized: "Music in the wings")
         case .clipboard: String(localized: "Clipboard history")
         case .screenshots: String(localized: "Screenshots to shelf")
+        case .sensors: String(localized: "Mic and camera indicator")
         case .stats: String(localized: "System stats")
         case .calendar: String(localized: "Calendar")
         case .meetings: String(localized: "Meeting countdown")
@@ -60,6 +62,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .mediaActivity: "waveform"
         case .clipboard: "doc.on.clipboard"
         case .screenshots: "camera.viewfinder"
+        case .sensors: "mic.fill"
         case .stats: "chart.bar.fill"
         case .calendar: "calendar"
         case .meetings: "video.fill"
@@ -89,6 +92,8 @@ enum FeatureID: String, CaseIterable, Identifiable {
             String(localized: "Keeps recent copied text, in memory only. Off by default; password manager entries are never captured.")
         case .screenshots:
             String(localized: "New screenshots land on the shelf automatically.")
+        case .sensors:
+            String(localized: "Shows in the wings, with elapsed time, when any app uses the microphone or camera.")
         case .stats:
             String(localized: "CPU, GPU, RAM, network, and battery readouts.")
         case .calendar:

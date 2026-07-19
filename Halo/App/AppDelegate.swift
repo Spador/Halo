@@ -16,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var clipboard: ClipboardHistory?
     private var screenshots: ScreenshotWatcher?
     private var meetings: MeetingCountdown?
+    private var sensors: SensorInUseMonitor?
     private var onboardingWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -72,6 +73,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         meetings.refresh()
 
+        // Privacy indicator: mic or camera in use, anywhere on the system.
+        let sensors = SensorInUseMonitor()
+        sensors.onLiveActivityChanged = { [weak liveActivities] activity in
+            liveActivities?.publish(activity, from: .recording)
+        }
+        if settings.isEnabled(.sensors) { sensors.start() }
+
         let hud = HUDCoordinator(volume: volume, brightness: displays) {
             [weak controller] state in
             controller?.showHUD(state)
@@ -105,6 +113,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 enabled ? self.screenshots?.start() : self.screenshots?.stop()
             case .meetings:
                 enabled ? self.meetings?.refresh() : self.meetings?.stop()
+            case .sensors:
+                enabled ? self.sensors?.start() : self.sensors?.stop()
             case .timer:
                 // Turning the page off cancels a running countdown so its
                 // live activity doesn't linger in the wings.
@@ -174,6 +184,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         self.clipboard = clipboard
         self.screenshots = screenshots
         self.meetings = meetings
+        self.sensors = sensors
         notchController = controller
         // The stream may have delivered before the engine reference was
         // stored above; publish once to catch up.

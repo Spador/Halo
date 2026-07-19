@@ -1,6 +1,7 @@
 import AppKit
 import Observation
 import CoreGraphics
+import SwiftUI
 
 /// The cards that can occupy the expanded notch. Each feature module
 /// contributes one; the shell decides which is visible.
@@ -28,6 +29,9 @@ struct LiveActivity: Equatable {
     var isMedia: Bool = false
     /// When set, clicking the wing opens this (meeting join links).
     var url: URL?
+    /// Explicit tint (mic indicator orange, camera green). Overrides the
+    /// white/green rule from `emphasized`.
+    var color: Color?
 }
 
 /// State shared between the panel controller (AppKit side) and the SwiftUI
