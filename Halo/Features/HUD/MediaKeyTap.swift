@@ -1,4 +1,5 @@
 import AppKit
+import os
 import ApplicationServices
 
 /// The media keys Halo intercepts. Raw values are Apple's NX_KEYTYPE_*
@@ -73,6 +74,10 @@ final class MediaKeyTap {
 
         // data1 packs the key code and state into bit fields; subtype 8
         // means "aux control key" (other subtypes exist on this event type).
+        // KNOWN LIMITATION: on current macOS builds, brightness keys never
+        // reach event taps at all (verified by logging every event here) —
+        // the system consumes them first. Volume keys still arrive. The
+        // brightness handling below stays for older or future builds.
         guard let nsEvent = NSEvent(cgEvent: event),
               nsEvent.subtype.rawValue == 8,
               let key = MediaKey(rawValue: Int32((nsEvent.data1 & 0xFFFF_0000) >> 16))

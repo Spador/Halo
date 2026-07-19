@@ -76,6 +76,9 @@ final class HUDCoordinator: NSObject {
     private func handle(_ key: MediaKey, isKeyDown: Bool) -> Bool {
         switch key {
         case .brightnessUp, .brightnessDown:
+            if isKeyDown {
+                Logger.hud.notice("brightness key received (up: \(key == .brightnessUp))")
+            }
             // Can't control the display the pointer is on? Pass the key to
             // the system (checked on down AND up so both are consistent).
             guard brightness.canControlDisplayUnderPointer() else {

@@ -7,7 +7,7 @@ struct ControlsPageView: View {
     let settings: SettingsStore
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 12) {
             slider(
                 icon: "speaker.wave.2.fill",
                 level: viewModel.volumeLevel,
@@ -22,11 +22,22 @@ struct ControlsPageView: View {
                 unavailableHint: String(localized: "No built-in display to control"),
                 onChange: { viewModel.setBrightness($0) }
             )
+            // The external monitor's backlight, over DDC. Only shown when
+            // the monitor provably applies brightness writes.
+            if viewModel.externalBrightnessAvailable {
+                slider(
+                    icon: "display",
+                    level: viewModel.externalBrightnessLevel,
+                    available: true,
+                    unavailableHint: "",
+                    onChange: { viewModel.setExternalBrightness($0) }
+                )
+            }
             outputPicker
             keepAwakeRow
         }
         .padding(.horizontal, 44)
-        .padding(.vertical, 10)
+        .padding(.vertical, 8)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear { viewModel.refresh() }
     }
@@ -44,7 +55,7 @@ struct ControlsPageView: View {
                     }
                 }
             }
-            .frame(maxHeight: 56)
+            .frame(maxHeight: 44)
         }
     }
 

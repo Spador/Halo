@@ -89,7 +89,8 @@ The app is not sandboxed. Spawning the media helper and the interfaces above req
 
 ## Known limitations
 
-- External monitor brightness over DDC is implemented but currently disabled (`DisplayBrightnessManager.externalBrightnessEnabled`). Some monitors accept DDC audio commands but ignore DDC brightness writes. Monitor speaker volume over DDC works
+- Brightness keys cannot be intercepted on current macOS builds: the system consumes them before any event tap, at any level, sees them (verified by logging every event reaching the tap). Built in display brightness keys therefore show the stock macOS pop up, not Halo's. Volume keys are unaffected
+- External monitor brightness works through the slider on the controls card, over DDC. Capability is verified per monitor at discovery: Halo nudges the level by one percent, reads it back, and restores it, retrying if the monitor's DDC bus is busy. Some monitors block DDC brightness while an energy saving or auto brightness mode is active in their own menu
 - The HUD feature needs the Accessibility permission. Quit Halo and your keys instantly revert to stock macOS behavior
 
 ## Requirements

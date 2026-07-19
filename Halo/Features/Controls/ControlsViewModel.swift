@@ -13,6 +13,10 @@ final class ControlsViewModel {
     private(set) var brightnessLevel: Double = 0
     private(set) var volumeAvailable = false
     private(set) var brightnessAvailable = false
+    /// External monitor brightness over DDC — the only way to control it,
+    /// since current macOS hides brightness keys from event taps.
+    private(set) var externalBrightnessLevel: Double = 0
+    private(set) var externalBrightnessAvailable = false
     private(set) var outputDevices: [AudioOutputDevice] = []
     private(set) var currentOutputID: AudioDeviceID?
 
@@ -48,8 +52,21 @@ final class ControlsViewModel {
             brightnessAvailable = false
         }
 
+        if let level = displays.externalBrightness() {
+            externalBrightnessAvailable = true
+            externalBrightnessLevel = level
+        } else {
+            externalBrightnessAvailable = false
+        }
+
         outputDevices = audioDevices.list()
         currentOutputID = audioDevices.defaultDeviceID()
+    }
+
+    func setExternalBrightness(_ level: Double) {
+        let clamped = min(max(level, 0), 1)
+        externalBrightnessLevel = clamped
+        _ = displays.setExternalBrightness(clamped)
     }
 
     /// Makes the device the system default output, like the Sound menu.
