@@ -4,9 +4,18 @@ import SwiftUI
 /// phase-colored completion ring, round dots, and pause/skip/reset.
 struct PomodoroPageView: View {
     let engine: PomodoroEngine
+    let settings: SettingsStore
+
+    @State private var showingStats = false
 
     var body: some View {
-        if let session = engine.session {
+        if showingStats {
+            PomodoroStatsView(
+                history: engine.history,
+                settings: settings,
+                onBack: { showingStats = false }
+            )
+        } else if let session = engine.session {
             running(session)
         } else {
             setup
@@ -37,13 +46,26 @@ struct PomodoroPageView: View {
             Text("Long break after every \(engine.settings.roundsPerSet) focus rounds")
                 .font(.system(size: 9))
                 .foregroundStyle(.white.opacity(0.4))
-            Button("Start Pomodoro") { engine.start() }
+            HStack(spacing: 10) {
+                Button("Start Pomodoro") { engine.start() }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 7)
+                    .background(Capsule().fill(.white))
+                Button {
+                    showingStats = true
+                } label: {
+                    Image(systemName: "chart.bar.xaxis")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.6))
+                        .frame(width: 28, height: 28)
+                        .contentShape(Rectangle())
+                }
                 .buttonStyle(.plain)
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(.black)
-                .padding(.horizontal, 18)
-                .padding(.vertical, 7)
-                .background(Capsule().fill(.white))
+                .help("Focus stats")
+            }
         }
     }
 

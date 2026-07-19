@@ -61,6 +61,9 @@ final class PomodoroEngine {
     }
     private(set) var session: Session?
 
+    /// Focus time and rounds per day, for the stats view. Local only.
+    let history = PomodoroHistory()
+
     @ObservationIgnored var onLiveActivityChanged: (LiveActivity?) -> Void = { _ in }
     @ObservationIgnored private var tickTask: Task<Void, Never>?
 
@@ -101,6 +104,7 @@ final class PomodoroEngine {
     }
 
     func reset() {
+        recordFocusIfEnding(completed: false)
         session = nil
         stopTicking()
         onLiveActivityChanged(nil)
@@ -128,6 +132,9 @@ final class PomodoroEngine {
     private func advancePhase(chime: Bool) {
         guard let finished = session else { return }
         if chime { NSSound(named: "Glass")?.play() }
+        // A chime means the phase ran out naturally: a completed round.
+        // A skip records only the time actually focused.
+        recordFocusIfEnding(completed: chime)
 
         switch finished.phase {
         case .work:
@@ -143,6 +150,12 @@ final class PomodoroEngine {
             session = makeSession(phase: .work, round: 1)
         }
         publishLiveActivity()
+    }
+
+    private func recordFocusIfEnding(completed: Bool) {
+        guard let current = session, current.phase == .work else { return }
+        let elapsed = current.phaseTotal - current.remaining(at: Date())
+        history.record(focusSeconds: Int(elapsed), completedRound: completed)
     }
 
     // MARK: - Ticking

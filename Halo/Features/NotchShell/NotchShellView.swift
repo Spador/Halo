@@ -216,7 +216,7 @@ struct NotchShellView: View {
         case .timer:
             TimerPageView(engine: quickTimer)
         case .pomodoro:
-            PomodoroPageView(engine: pomodoro)
+            PomodoroPageView(engine: pomodoro, settings: settings)
         case .stats:
             StatsView(viewModel: stats)
         case nil:
