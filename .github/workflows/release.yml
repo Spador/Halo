@@ -73,6 +73,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # A release may already exist when the tag came from a local
+          # gh release create; don't stack a duplicate draft on top.
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists; skipping draft."
+            exit 0
+          fi
           gh release create "$GITHUB_REF_NAME" "${{ steps.pack.outputs.zip }}" \
             --draft \
             --title "Halo $GITHUB_REF_NAME" \
