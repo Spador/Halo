@@ -114,7 +114,8 @@ struct NotchShellView: View {
                     .transition(.opacity)
             }
         }
-        .overlay(alignment: .topTrailing) { cardSwitcher }
+        .overlay(alignment: .topLeading) { cardSwitcher(leadingCards, edge: .leading) }
+        .overlay(alignment: .topTrailing) { cardSwitcher(trailingCards, edge: .trailing) }
     }
 
     private func enabled(_ feature: FeatureID) -> Bool {
@@ -148,8 +149,12 @@ struct NotchShellView: View {
             .first { enabled($0.feature) }
     }
 
-    /// Cards worth offering in the switcher (enabled pages always are).
-    private var availableCards: [(card: NotchCard, symbol: String)] {
+    /// The switcher lives on both edges because the strip between them is
+    /// hidden behind the physical notch: content cards (media, shelf,
+    /// sliders, clipboard) gather on the left edge, the four fixed pages
+    /// keep the right. Each side holds at most four icons, so none can
+    /// slide under the housing.
+    private var leadingCards: [(card: NotchCard, symbol: String)] {
         var cards: [(NotchCard, String)] = []
         if enabled(.nowPlaying), nowPlaying.info != nil {
             cards.append((.nowPlaying, "music.note"))
@@ -159,6 +164,11 @@ struct NotchShellView: View {
         }
         if enabled(.controls) { cards.append((.controls, "slider.horizontal.3")) }
         if enabled(.clipboard) { cards.append((.clipboard, "doc.on.clipboard")) }
+        return cards
+    }
+
+    private var trailingCards: [(card: NotchCard, symbol: String)] {
+        var cards: [(NotchCard, String)] = []
         if enabled(.calendar) { cards.append((.calendar, "calendar")) }
         if enabled(.timer) { cards.append((.timer, "timer")) }
         if enabled(.pomodoro) { cards.append((.pomodoro, "brain.head.profile")) }
@@ -199,18 +209,23 @@ struct NotchShellView: View {
         }
     }
 
-    /// Tiny switcher in the top-right strip beside the notch, shown only
-    /// when there's more than one card to switch between.
+    /// One edge's half of the switcher, shown only when there is more than
+    /// one card overall to switch between.
     @ViewBuilder
-    private var cardSwitcher: some View {
-        if viewModel.isExpanded, availableCards.count > 1 {
+    private func cardSwitcher(
+        _ cards: [(card: NotchCard, symbol: String)],
+        edge: HorizontalEdge
+    ) -> some View {
+        if viewModel.isExpanded,
+           leadingCards.count + trailingCards.count > 1,
+           !cards.isEmpty {
             HStack(spacing: 5) {
-                ForEach(availableCards, id: \.card) { entry in
+                ForEach(cards, id: \.card) { entry in
                     cardButton(entry.card, symbol: entry.symbol)
                 }
             }
             .padding(.top, 7)
-            .padding(.trailing, 14)
+            .padding(edge == .leading ? .leading : .trailing, 14)
             .transition(.opacity)
         }
     }
