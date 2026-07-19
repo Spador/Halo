@@ -7,7 +7,7 @@ struct ControlsPageView: View {
     let settings: SettingsStore
 
     var body: some View {
-        VStack(spacing: 30) {
+        VStack(spacing: 20) {
             slider(
                 icon: "speaker.wave.2.fill",
                 level: viewModel.volumeLevel,
@@ -22,10 +22,60 @@ struct ControlsPageView: View {
                 unavailableHint: String(localized: "No built-in display to control"),
                 onChange: { viewModel.setBrightness($0) }
             )
+            outputPicker
         }
         .padding(.horizontal, 44)
+        .padding(.vertical, 14)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear { viewModel.refresh() }
+    }
+
+    /// The output destination list, refreshed each time the card opens.
+    private var outputPicker: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text("Output")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.4))
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 1) {
+                    ForEach(viewModel.outputDevices) { device in
+                        outputRow(device)
+                    }
+                }
+            }
+            .frame(maxHeight: 78)
+        }
+    }
+
+    private func outputRow(_ device: AudioOutputDevice) -> some View {
+        let isCurrent = device.id == viewModel.currentOutputID
+        return Button {
+            viewModel.selectOutput(device)
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: device.iconName)
+                    .font(.system(size: 11))
+                    .frame(width: 18)
+                Text(device.name)
+                    .font(.system(size: 12))
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+                if isCurrent {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(settings.accent.color)
+                }
+            }
+            .foregroundStyle(.white.opacity(isCurrent ? 0.95 : 0.6))
+            .padding(.horizontal, 8)
+            .frame(height: 24)
+            .contentShape(Rectangle())
+            .background(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(.white.opacity(isCurrent ? 0.08 : 0))
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder

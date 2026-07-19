@@ -1,3 +1,4 @@
+import CoreAudio
 import Observation
 
 /// State for the control sliders card. Routes volume to whichever backend
@@ -12,9 +13,12 @@ final class ControlsViewModel {
     private(set) var brightnessLevel: Double = 0
     private(set) var volumeAvailable = false
     private(set) var brightnessAvailable = false
+    private(set) var outputDevices: [AudioOutputDevice] = []
+    private(set) var currentOutputID: AudioDeviceID?
 
     @ObservationIgnored private let volume: VolumeControl
     @ObservationIgnored private let displays: DisplayBrightnessManager
+    @ObservationIgnored private let audioDevices = AudioOutputDevices()
 
     init(volume: VolumeControl, displays: DisplayBrightnessManager) {
         self.volume = volume
@@ -40,6 +44,16 @@ final class ControlsViewModel {
         } else {
             brightnessAvailable = false
         }
+
+        outputDevices = audioDevices.list()
+        currentOutputID = audioDevices.defaultDeviceID()
+    }
+
+    /// Makes the device the system default output, like the Sound menu.
+    /// Volume routing may change with it, so re-read everything.
+    func selectOutput(_ device: AudioOutputDevice) {
+        audioDevices.setDefault(device.id)
+        refresh()
     }
 
     func setVolume(_ level: Double) {
