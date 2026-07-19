@@ -7,7 +7,7 @@ struct ControlsPageView: View {
     let settings: SettingsStore
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 14) {
             slider(
                 icon: "speaker.wave.2.fill",
                 level: viewModel.volumeLevel,
@@ -23,9 +23,10 @@ struct ControlsPageView: View {
                 onChange: { viewModel.setBrightness($0) }
             )
             outputPicker
+            keepAwakeRow
         }
         .padding(.horizontal, 44)
-        .padding(.vertical, 14)
+        .padding(.vertical, 10)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear { viewModel.refresh() }
     }
@@ -43,8 +44,38 @@ struct ControlsPageView: View {
                     }
                 }
             }
-            .frame(maxHeight: 78)
+            .frame(maxHeight: 56)
         }
+    }
+
+    /// Prevents display and system sleep while on — for presentations or
+    /// long downloads. The assertion can never outlive the app.
+    private var keepAwakeRow: some View {
+        HStack(spacing: 14) {
+            Image(systemName: "cup.and.saucer.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(
+                    viewModel.keepAwake.isActive
+                        ? AnyShapeStyle(settings.accent.color)
+                        : AnyShapeStyle(.white.opacity(0.4))
+                )
+                .frame(width: 26)
+            Text("Keep awake")
+                .font(.system(size: 12))
+                .foregroundStyle(.white.opacity(0.85))
+            Spacer()
+            Toggle("", isOn: keepAwakeBinding)
+                .toggleStyle(.switch)
+                .controlSize(.mini)
+                .labelsHidden()
+        }
+    }
+
+    private var keepAwakeBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.keepAwake.isActive },
+            set: { viewModel.keepAwake.setActive($0) }
+        )
     }
 
     private func outputRow(_ device: AudioOutputDevice) -> some View {

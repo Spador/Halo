@@ -202,6 +202,9 @@
     "Hover delay" : {
 
     },
+    "Keep awake" : {
+
+    },
     "Keeps recent copied text, in memory only. Off by default; password manager entries are never captured." : {
 
     },
