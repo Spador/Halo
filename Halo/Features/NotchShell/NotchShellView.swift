@@ -10,6 +10,7 @@ struct NotchShellView: View {
     let controls: ControlsViewModel
     let clipboard: ClipboardHistory
     let meetings: MeetingCountdown
+    let colorPicker: ColorPickerStore
     let stats: StatsViewModel
     let calendar: CalendarService
     let quickTimer: QuickTimerEngine
@@ -136,7 +137,8 @@ struct NotchShellView: View {
             case .shelf: if shelf.hasItems { return .shelf }
             case .nowPlaying: if nowPlaying.info != nil { return .nowPlaying }
             // Always-available pages honor the choice unconditionally.
-            case .controls, .clipboard, .calendar, .timer, .pomodoro, .stats:
+            case .controls, .clipboard, .colorPicker, .calendar, .timer, .pomodoro,
+                .stats:
                 return selected
             }
         }
@@ -165,6 +167,7 @@ struct NotchShellView: View {
         }
         if enabled(.controls) { cards.append((.controls, "slider.horizontal.3")) }
         if enabled(.clipboard) { cards.append((.clipboard, "doc.on.clipboard")) }
+        if enabled(.colorPicker) { cards.append((.colorPicker, "eyedropper")) }
         return cards
     }
 
@@ -190,6 +193,8 @@ struct NotchShellView: View {
             ControlsPageView(viewModel: controls, settings: settings)
         case .clipboard:
             ClipboardPageView(history: clipboard, settings: settings)
+        case .colorPicker:
+            ColorPickerPageView(store: colorPicker, settings: settings)
         case .nowPlaying:
             if let info = nowPlaying.info {
                 NowPlayingView(viewModel: nowPlaying, info: info, settings: settings)

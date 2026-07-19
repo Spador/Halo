@@ -10,6 +10,7 @@ enum NotchCard {
     case shelf
     case controls
     case clipboard
+    case colorPicker
     case calendar
     case timer
     case pomodoro

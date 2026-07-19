@@ -36,6 +36,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let controls = ControlsViewModel(volume: volume, displays: displays)
         let clipboard = ClipboardHistory()
         let meetings = MeetingCountdown(calendar: calendar)
+        let colorPicker = ColorPickerStore()
         let controller = NotchPanelController(
             screen: screen,
             nowPlaying: nowPlaying,
@@ -43,6 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             controls: controls,
             clipboard: clipboard,
             meetings: meetings,
+            colorPicker: colorPicker,
             stats: stats,
             calendar: calendar,
             quickTimer: quickTimer,
@@ -124,7 +126,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             case .mediaActivity:
                 // Re-evaluate with the flag's new value.
                 self.publishMediaActivity(self.nowPlaying?.info)
-            case .shelf, .controls, .scrollVolume, .gestures, .stats, .calendar:
+            case .shelf, .controls, .scrollVolume, .gestures, .colorPicker,
+                .stats, .calendar:
                 break  // View-level or checked at use; nothing to stop.
             }
         }

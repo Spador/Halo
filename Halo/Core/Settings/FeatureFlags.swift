@@ -12,6 +12,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
     case gestures
     case mediaActivity
     case clipboard
+    case colorPicker
     case screenshots
     case sensors
     case stats
@@ -41,6 +42,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .gestures: String(localized: "Trackpad gestures")
         case .mediaActivity: String(localized: "Music in the wings")
         case .clipboard: String(localized: "Clipboard history")
+        case .colorPicker: String(localized: "Color picker")
         case .screenshots: String(localized: "Screenshots to shelf")
         case .sensors: String(localized: "Mic and camera indicator")
         case .stats: String(localized: "System stats")
@@ -61,6 +63,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .gestures: "hand.draw.fill"
         case .mediaActivity: "waveform"
         case .clipboard: "doc.on.clipboard"
+        case .colorPicker: "eyedropper"
         case .screenshots: "camera.viewfinder"
         case .sensors: "mic.fill"
         case .stats: "chart.bar.fill"
@@ -90,6 +93,8 @@ enum FeatureID: String, CaseIterable, Identifiable {
             String(localized: "Mini artwork and equalizer beside the notch while music plays.")
         case .clipboard:
             String(localized: "Keeps recent copied text, in memory only. Off by default; password manager entries are never captured.")
+        case .colorPicker:
+            String(localized: "Pick any color on screen with the system loupe; recent picks stay as swatches.")
         case .screenshots:
             String(localized: "New screenshots land on the shelf automatically.")
         case .sensors:
@@ -116,6 +121,7 @@ extension NotchCard {
         case .shelf: .shelf
         case .controls: .controls
         case .clipboard: .clipboard
+        case .colorPicker: .colorPicker
         case .calendar: .calendar
         case .timer: .timer
         case .pomodoro: .pomodoro
