@@ -40,6 +40,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let worldClock = WorldClockStore()
         let mirror = CameraMirror()
         let todos = RemindersService()
+        let weather = WeatherService()
         let controller = NotchPanelController(
             screen: screen,
             nowPlaying: nowPlaying,
@@ -51,6 +52,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             worldClock: worldClock,
             mirror: mirror,
             todos: todos,
+            weather: weather,
             stats: stats,
             calendar: calendar,
             quickTimer: quickTimer,
@@ -133,8 +135,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 // Re-evaluate with the flag's new value.
                 self.publishMediaActivity(self.nowPlaying?.info)
             case .shelf, .controls, .scrollVolume, .gestures, .colorPicker,
-                .mirror, .worldClock, .todos, .stats, .calendar:
-                break  // View-level or checked at use; nothing to stop.
+                .mirror, .worldClock, .todos, .weather, .stats, .calendar:
+                break  // View-level or checked at use; the network layer
+                // additionally refuses weather requests when its flag is off.
             }
         }
 

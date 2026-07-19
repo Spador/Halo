@@ -72,7 +72,15 @@ On first launch, grant Accessibility when asked. That powers the volume and brig
 
 ## Privacy and permissions
 
-Halo makes zero network connections. Nothing you play, hold, copy, or schedule ever leaves the machine. The only data written to disk lives in the app preferences: pinned shelf file paths, pinned clipboard entries, your settings, and your Pomodoro durations.
+Halo makes zero network connections by default. Nothing you play, hold, copy, or schedule ever leaves the machine. The only data written to disk lives in the app preferences: pinned shelf file paths, pinned clipboard entries, your settings, your Pomodoro durations and history, and your chosen weather city.
+
+A few optional features use the internet. Each ships switched off, states plainly what it sends, and every request in the entire app flows through one small file (`Core/Networking/HaloNetwork.swift`) that refuses requests for disabled features and for any host not on its allowlist, uses an ephemeral session (no cookies, no cache on disk), and logs every contact. Auditing Halo's network behavior means reading that one file.
+
+| Network feature | Default | Host contacted | What leaves the machine |
+|---|---|---|---|
+| Weather | Off | api.open-meteo.com, geocoding-api.open-meteo.com | The city name you search for, and that city's coordinates. Never your location. No account, no key |
+
+There is still no telemetry, no analytics, and no crash reporting, and there never will be.
 
 The clipboard history feature is off by default. When enabled it checks the pasteboard change counter once per second (macOS offers no notification for this), keeps captured text in memory only, and never captures entries that password managers mark concealed or transient. Clear removes everything except your pins.
 

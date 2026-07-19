@@ -20,6 +20,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
     case calendar
     case worldClock
     case todos
+    case weather
     case meetings
     case timer
     case pomodoro
@@ -31,6 +32,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
     var enabledByDefault: Bool {
         switch self {
         case .clipboard: false
+        case .weather: false  // network feature: off until switched on
         default: true
         }
     }
@@ -53,6 +55,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .calendar: String(localized: "Calendar")
         case .worldClock: String(localized: "World clock")
         case .todos: String(localized: "To-do list")
+        case .weather: String(localized: "Weather")
         case .meetings: String(localized: "Meeting countdown")
         case .timer: String(localized: "Quick timers")
         case .pomodoro: String(localized: "Pomodoro")
@@ -77,6 +80,7 @@ enum FeatureID: String, CaseIterable, Identifiable {
         case .calendar: "calendar"
         case .worldClock: "globe"
         case .todos: "checklist"
+        case .weather: "cloud.sun.fill"
         case .meetings: "video.fill"
         case .timer: "timer"
         case .pomodoro: "brain.head.profile"
@@ -118,6 +122,8 @@ enum FeatureID: String, CaseIterable, Identifiable {
             String(localized: "Your cities and their local times, at a glance.")
         case .todos:
             String(localized: "Your Apple Reminders: quick add, check off, due dates.")
+        case .weather:
+            String(localized: "NETWORK, off by default. When on, contacts api.open-meteo.com with your chosen city's coordinates only. Never your location, no account, no key.")
         case .meetings:
             String(localized: "Counts down to your next meeting in the wings, with a join link.")
         case .timer:
@@ -141,6 +147,7 @@ extension NotchCard {
         case .calendar: .calendar
         case .worldClock: .worldClock
         case .todos: .todos
+        case .weather: .weather
         case .timer: .timer
         case .pomodoro: .pomodoro
         case .stats: .stats

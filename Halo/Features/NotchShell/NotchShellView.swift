@@ -14,6 +14,7 @@ struct NotchShellView: View {
     let worldClock: WorldClockStore
     let mirror: CameraMirror
     let todos: RemindersService
+    let weather: WeatherService
     let stats: StatsViewModel
     let calendar: CalendarService
     let quickTimer: QuickTimerEngine
@@ -141,7 +142,7 @@ struct NotchShellView: View {
             case .nowPlaying: if nowPlaying.info != nil { return .nowPlaying }
             // Always-available pages honor the choice unconditionally.
             case .controls, .clipboard, .colorPicker, .mirror, .calendar,
-                .worldClock, .todos, .timer, .pomodoro, .stats:
+                .worldClock, .todos, .weather, .timer, .pomodoro, .stats:
                 return selected
             }
         }
@@ -180,6 +181,7 @@ struct NotchShellView: View {
         if enabled(.calendar) { cards.append((.calendar, "calendar")) }
         if enabled(.worldClock) { cards.append((.worldClock, "globe")) }
         if enabled(.todos) { cards.append((.todos, "checklist")) }
+        if enabled(.weather) { cards.append((.weather, "cloud.sun.fill")) }
         if enabled(.timer) { cards.append((.timer, "timer")) }
         if enabled(.pomodoro) { cards.append((.pomodoro, "brain.head.profile")) }
         if enabled(.stats) { cards.append((.stats, "chart.bar.fill")) }
@@ -213,6 +215,8 @@ struct NotchShellView: View {
             WorldClockPageView(store: worldClock, settings: settings)
         case .todos:
             TodoPageView(todos: todos, settings: settings)
+        case .weather:
+            WeatherPageView(weather: weather, settings: settings)
         case .timer:
             TimerPageView(engine: quickTimer)
         case .pomodoro:
