@@ -97,6 +97,8 @@ struct ShelfTileView: View {
     let settings: SettingsStore
 
     @State private var isHovering = false
+    @State private var isRenaming = false
+    @State private var draftName = ""
 
     private var isSelected: Bool {
         viewModel.selectedIDs.contains(item.id)
@@ -117,11 +119,28 @@ struct ShelfTileView: View {
                             .offset(x: 4, y: -4)
                     }
                 }
-            Text(item.name)
-                .font(.system(size: 9))
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .foregroundStyle(.white.opacity(0.75))
+            if isRenaming {
+                TextField("", text: $draftName)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 9))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.white)
+                    .background(
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(.white.opacity(0.15))
+                    )
+                    .onSubmit {
+                        viewModel.rename(item, to: draftName)
+                        isRenaming = false
+                    }
+                    .onExitCommand { isRenaming = false }
+            } else {
+                Text(item.name)
+                    .font(.system(size: 9))
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .foregroundStyle(.white.opacity(0.75))
+            }
         }
         .frame(width: 66)
         .padding(.vertical, 6)
@@ -142,6 +161,24 @@ struct ShelfTileView: View {
             Button(item.isPinned ? "Unpin" : "Pin") { viewModel.togglePin(item) }
             Button("Send via AirDrop") { viewModel.airDrop(item) }
             Button("Show in Finder") { viewModel.revealInFinder(item) }
+            Divider()
+            if viewModel.selectedIDs.count >= 2, isSelected {
+                Button("Compress \(viewModel.selectedIDs.count) Files to Zip") {
+                    viewModel.compress(viewModel.selectedURLs)
+                }
+            } else {
+                Button("Compress to Zip") { viewModel.compress([item.url]) }
+            }
+            if item.isImage {
+                Menu("Convert Image") {
+                    Button("To PNG") { viewModel.convertImage(item, to: .png) }
+                    Button("To JPEG") { viewModel.convertImage(item, to: .jpeg) }
+                }
+            }
+            Button("Rename") {
+                draftName = item.name
+                isRenaming = true
+            }
             Divider()
             Button("Remove from Shelf") { viewModel.remove(item) }
         }
