@@ -6,6 +6,7 @@ import SwiftUI
 struct SettingsView: View {
     @Bindable var settings: SettingsStore
     @State private var launchAtLogin = LaunchAtLogin()
+    @State private var updates = UpdateChecker()
 
     var body: some View {
         TabView {
@@ -194,6 +195,27 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Updates") {
+                if settings.isEnabled(.updateCheck) {
+                    HStack(spacing: 10) {
+                        Button(updates.state == .checking
+                            ? String(localized: "Checking...")
+                            : String(localized: "Check for updates")) {
+                            updates.check()
+                        }
+                        .disabled(updates.state == .checking)
+                        updateResult
+                    }
+                    Text("Version \(updates.currentVersion). Asks api.github.com once per click; nothing runs in the background.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Off. Enable the update check in Features to add a manual button here.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             Section {
                 Button("Show the welcome tour") {
                     settings.replayOnboarding()
@@ -201,6 +223,27 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    @ViewBuilder
+    private var updateResult: some View {
+        switch updates.state {
+        case .idle, .checking:
+            EmptyView()
+        case .upToDate:
+            Text("Up to date")
+                .font(.callout)
+                .foregroundStyle(.green)
+        case .available(let version):
+            Button("Version \(version) is out - open releases") {
+                updates.openReleasePage()
+            }
+            .buttonStyle(.link)
+        case .failed:
+            Text("Could not reach api.github.com")
+                .font(.callout)
+                .foregroundStyle(.orange)
+        }
     }
 
     private func virtualNotchBinding(_ name: String) -> Binding<Bool> {

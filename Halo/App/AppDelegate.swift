@@ -157,7 +157,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 // Re-evaluate with the flag's new value.
                 self.publishMediaActivity(self.nowPlaying?.info)
             case .shelf, .controls, .scrollVolume, .gestures, .colorPicker,
-                .mirror, .worldClock, .todos, .weather, .stats, .calendar:
+                .mirror, .worldClock, .todos, .weather, .updateCheck,
+                .stats, .calendar:
                 break  // View-level or checked at use; the network layer
                 // additionally refuses weather requests when its flag is off.
             }

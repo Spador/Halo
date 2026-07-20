@@ -85,6 +85,7 @@ A few optional features use the internet. Each ships switched off, states plainl
 | Network feature | Default | Host contacted | What leaves the machine |
 |---|---|---|---|
 | Weather | Off | api.open-meteo.com, geocoding-api.open-meteo.com | The city name you search for, and that city's coordinates. Never your location. No account, no key |
+| Update check | Off | api.github.com | A request for the newest release tag, only when you click the button. Nothing runs in the background |
 
 There is still no telemetry, no analytics, and no crash reporting, and there never will be.
 

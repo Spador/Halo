@@ -32,6 +32,7 @@ final class HaloNetwork {
     private static let allowedHosts: Set<String> = [
         "api.open-meteo.com",           // weather
         "geocoding-api.open-meteo.com", // weather city search
+        "api.github.com",               // manual update check
     ]
 
     private init() {
