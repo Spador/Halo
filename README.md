@@ -36,6 +36,8 @@ Halo lives around the notch. Hover over it and it expands into a hub for media c
 - Pomodoro history: a weekly focus chart, daily totals, rounds, and streaks, all local
 - Weather (off by default, the only network feature): current conditions and a five day forecast for a city you choose, from Open-Meteo
 - Settings window: every feature has an on and off toggle, plus accent color and tint themes, global keyboard shortcuts that open any page from anywhere, launch at login, and a live view of permissions
+- Virtual notch: draw a Halo island, with all the same pages, on external displays you choose in Settings
+- Optional manual update check against GitHub releases, off by default
 - A short welcome tour on first launch
 
 ## Install (no Xcode needed)
@@ -115,6 +117,8 @@ The app is not sandboxed. Spawning the media helper and the interfaces above req
 - Notification mirroring was considered and deliberately skipped: reading other apps' notifications needs either Full Disk Access or scraping Notification Center's accessibility tree, and either way it could only duplicate banners macOS is already showing
 - Screen recording as such is not detectable with public API; the mic and camera indicator catches recordings indirectly through the microphone most of them capture. AirDrop transfer progress is similarly not exposed by the system
 - Live lyrics were considered and skipped: every free lyrics source serves unlicensed copyrighted text, and the licensed providers are paid and prohibit third party display. Not a trade this project makes
+- Lock screen presence was considered and skipped: the modern lock screen runs in its own window server context that regular apps cannot draw above, and the workarounds belong to system daemons, not a notch app
+- Every user facing string lives in a String Catalog, so the app is ready for translation. Translations are welcome as pull requests
 
 ## Requirements
 
