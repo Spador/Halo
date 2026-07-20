@@ -29,6 +29,12 @@ Halo lives around the notch. Hover over it and it expands into a hub for media c
 - Mic and camera indicator: whenever any app uses the microphone or camera, the wings show an orange mic or green camera with elapsed time, like the iPhone's privacy indicator
 - System stats: CPU, GPU, RAM and network readouts, and a two line battery section with health and cycle count, time to full while charging, connected accessory batteries, a green charging flash in the notch, and a red flash when the battery sinks through 20 and 10 percent
 - Calendar page with a month grid and per day events, quick timers with a completion ring, and a full Pomodoro timer with configurable rounds. Running timers stay visible in the collapsed notch
+- Color picker: the system loupe picks any pixel on screen, copies the hex instantly, and keeps recent picks as swatches
+- World clock: your cities with local times, offsets, and day markers
+- Camera mirror: a quick flipped webcam check before a call. The camera runs only while the page is open and nothing is recorded
+- To-do list backed by Apple Reminders: quick add, check off, due dates, synced both ways
+- Pomodoro history: a weekly focus chart, daily totals, rounds, and streaks, all local
+- Weather (off by default, the only network feature): current conditions and a five day forecast for a city you choose, from Open-Meteo
 - Settings window: every feature has an on and off toggle, plus accent color and tint themes, global keyboard shortcuts that open any page from anywhere, launch at login, and a live view of permissions
 - A short welcome tour on first launch
 
@@ -88,6 +94,8 @@ The clipboard history feature is off by default. When enabled it checks the past
 |---|---|---|---|
 | Accessibility | At launch, for the HUD feature | An event tap must intercept volume and brightness keys before macOS shows its own HUD | The tap is filtered to system media key events only. See `MediaKeyTap.swift`. Ordinary keystrokes travel on a different event type and never reach Halo |
 | Calendar (full access) | Only when you click Connect Calendar | To show your events in the notch | Read only usage. Declining just leaves the calendar page empty |
+| Camera | Only when you click Enable the mirror | The mirror page's webcam preview | Runs only while the mirror page is open; nothing is recorded |
+| Reminders (full access) | Only when you click Connect Reminders | The to-do page | Shows, adds, and completes reminders. Declining leaves the page empty |
 
 Halo uses three private or undocumented API surfaces, listed in the open. Each fails gracefully if a macOS update breaks it:
 
@@ -105,6 +113,7 @@ The app is not sandboxed. Spawning the media helper and the interfaces above req
 - The HUD feature needs the Accessibility permission. Quit Halo and your keys instantly revert to stock macOS behavior
 - Notification mirroring was considered and deliberately skipped: reading other apps' notifications needs either Full Disk Access or scraping Notification Center's accessibility tree, and either way it could only duplicate banners macOS is already showing
 - Screen recording as such is not detectable with public API; the mic and camera indicator catches recordings indirectly through the microphone most of them capture. AirDrop transfer progress is similarly not exposed by the system
+- Live lyrics were considered and skipped: every free lyrics source serves unlicensed copyrighted text, and the licensed providers are paid and prohibit third party display. Not a trade this project makes
 
 ## Requirements
 
