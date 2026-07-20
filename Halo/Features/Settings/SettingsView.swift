@@ -166,6 +166,25 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Virtual notch") {
+                let externals = NSScreen.screens.filter { $0.safeAreaInsets.top == 0 }
+                if externals.isEmpty {
+                    Text("No external display connected")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(externals, id: \.localizedName) { screen in
+                        Toggle(
+                            screen.localizedName,
+                            isOn: virtualNotchBinding(screen.localizedName)
+                        )
+                    }
+                    Text("Draws a Halo island at the top of the display, with all the same pages.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             Section("Startup") {
                 Toggle("Launch Halo at login", isOn: launchAtLoginBinding)
                 if let error = launchAtLogin.lastError {
@@ -182,6 +201,13 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    private func virtualNotchBinding(_ name: String) -> Binding<Bool> {
+        Binding(
+            get: { settings.virtualNotchScreenNames.contains(name) },
+            set: { settings.setVirtualNotch(screenName: name, enabled: $0) }
+        )
     }
 
     /// Slider wants a Double; the store keeps whole milliseconds.

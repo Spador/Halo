@@ -18,6 +18,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var meetings: MeetingCountdown?
     private var sensors: SensorInUseMonitor?
     private var onboardingWindow: NSWindow?
+    /// Virtual notch islands on external displays, keyed by screen name.
+    private var externalControllers: [String: NotchPanelController] = [:]
+    /// Builds an island for a given external screen, wired like the main
+    /// one. Set up once at launch with all the shared modules captured.
+    private var makeExternalController: ((NSScreen, String) -> NotchPanelController)?
+
+    /// Every island currently on screen. Broadcasts (HUD flashes, live
+    /// activities) go to all of them.
+    private var allControllers: [NotchPanelController] {
+        [notchController].compactMap { $0 } + Array(externalControllers.values)
+    }
+
+    /// Pointer-driven actions (global shortcuts) target the island on the
+    /// screen the pointer is on.
+    private func controllerUnderPointer() -> NotchPanelController? {
+        let point = NSEvent.mouseLocation
+        guard let screen = NSScreen.screens.first(
+            where: { NSMouseInRect(point, $0.frame, false) }
+        ) else { return notchController }
+        if screen.safeAreaInsets.top > 0 { return notchController }
+        return externalControllers[screen.localizedName] ?? notchController
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard let screen = NotchGeometry.preferredScreen() else { return }
@@ -63,8 +85,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Every feature publishes its live activity to the engine, which
         // ranks them and hands the controller at most two to display.
         let liveActivities = LiveActivityEngine()
-        liveActivities.onDisplayChanged = { [weak controller] items in
-            controller?.setLiveActivities(items)
+        liveActivities.onDisplayChanged = { [weak self] items in
+            self?.allControllers.forEach { $0.setLiveActivities(items) }
         }
         quickTimer.onLiveActivityChanged = { [weak liveActivities] activity in
             liveActivities?.publish(activity, from: .quickTimer)
@@ -91,8 +113,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if settings.isEnabled(.sensors) { sensors.start() }
 
         let hud = HUDCoordinator(volume: volume, brightness: displays) {
-            [weak controller] state in
-            controller?.showHUD(state)
+            [weak self] state in
+            self?.allControllers.forEach { $0.showHUD(state) }
             // Keep the sliders in step when keys change a level.
             controls.refresh()
         }
@@ -154,11 +176,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // Global shortcuts jump straight to a page from any app.
         let hotKeys = HotKeyCenter()
-        hotKeys.onAction = { [weak controller] action in
+        hotKeys.onAction = { [weak self] action in
+            guard let target = self?.controllerUnderPointer() else { return }
             if let card = action.card {
-                controller?.openCard(card)
+                target.openCard(card)
             } else {
-                controller?.toggleExpanded()
+                target.toggleExpanded()
             }
         }
         hotKeys.apply(settings.typedHotKeyBindings())
@@ -173,15 +196,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // Plugging in the charger flashes a green battery HUD in the wings;
         // sinking through 20 and 10 percent flashes a red warning.
-        battery.onChargingBegan = { [weak controller] status in
-            controller?.showHUD(
-                HUDState(kind: .battery, level: Double(status.percent) / 100)
-            )
+        battery.onChargingBegan = { [weak self] status in
+            self?.allControllers.forEach {
+                $0.showHUD(HUDState(kind: .battery, level: Double(status.percent) / 100))
+            }
         }
-        battery.onLowBattery = { [weak controller] status in
-            controller?.showHUD(
-                HUDState(kind: .batteryLow, level: Double(status.percent) / 100)
-            )
+        battery.onLowBattery = { [weak self] status in
+            self?.allControllers.forEach {
+                $0.showHUD(HUDState(kind: .batteryLow, level: Double(status.percent) / 100))
+            }
         }
 
         self.nowPlaying = nowPlaying
@@ -202,12 +225,86 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // stored above; publish once to catch up.
         publishMediaActivity(nowPlaying.info)
 
+        // Virtual notch islands on chosen external displays: same modules,
+        // one more panel per screen.
+        makeExternalController = { [weak self] externalScreen, name in
+            let external = NotchPanelController(
+                screen: externalScreen,
+                nowPlaying: nowPlaying,
+                shelf: shelf,
+                controls: controls,
+                clipboard: clipboard,
+                meetings: meetings,
+                colorPicker: colorPicker,
+                worldClock: worldClock,
+                mirror: mirror,
+                todos: todos,
+                weather: weather,
+                stats: stats,
+                calendar: calendar,
+                quickTimer: quickTimer,
+                pomodoro: pomodoro,
+                resolveScreen: {
+                    NSScreen.screens.first {
+                        $0.localizedName == name && $0.safeAreaInsets.top == 0
+                    }
+                }
+            )
+            external.onVolumeScroll = { [weak self] delta in
+                guard SettingsStore.shared.isEnabled(.scrollVolume) else { return }
+                self?.hud?.adjustVolume(by: delta)
+            }
+            external.onTrackSwipe = { [weak self] next in
+                next ? self?.nowPlaying?.nextTrack() : self?.nowPlaying?.previousTrack()
+            }
+            return external
+        }
+        settings.onVirtualNotchChanged = { [weak self] in
+            self?.rebuildExternalNotches()
+        }
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(displaysDidChange),
+            name: NSApplication.didChangeScreenParametersNotification,
+            object: nil
+        )
+        rebuildExternalNotches()
+
         settings.onReplayOnboardingRequested = { [weak self] in
             self?.showOnboarding()
         }
         if !settings.hasCompletedOnboarding {
             showOnboarding()
         }
+    }
+
+    @objc private func displaysDidChange() {
+        rebuildExternalNotches()
+    }
+
+    /// Creates islands for chosen external displays that are present, and
+    /// closes islands whose display left or was toggled off. The screen
+    /// hosting the main island never gets a second one.
+    private func rebuildExternalNotches() {
+        let wanted = SettingsStore.shared.virtualNotchScreenNames
+        let mainScreen = NotchGeometry.preferredScreen()
+        var kept: [String: NotchPanelController] = [:]
+
+        for screen in NSScreen.screens
+        where screen.safeAreaInsets.top == 0 && screen != mainScreen {
+            let name = screen.localizedName
+            guard wanted.contains(name) else { continue }
+            if let existing = externalControllers.removeValue(forKey: name) {
+                kept[name] = existing
+            } else if let controller = makeExternalController?(screen, name) {
+                controller.show()
+                kept[name] = controller
+            }
+        }
+        for orphan in externalControllers.values {
+            orphan.close()
+        }
+        externalControllers = kept
     }
 
     func applicationWillTerminate(_ notification: Notification) {

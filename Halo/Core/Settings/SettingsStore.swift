@@ -94,6 +94,29 @@ final class SettingsStore {
         onFeatureChanged?(feature, enabled)
     }
 
+    // MARK: - Virtual notch
+
+    /// External display names that get a virtual Halo island.
+    private(set) var virtualNotchScreenNames: Set<String> {
+        didSet {
+            defaults.set(
+                Array(virtualNotchScreenNames).sorted(), forKey: Keys.virtualNotch
+            )
+        }
+    }
+
+    /// The composition root rebuilds the external islands on change.
+    @ObservationIgnored var onVirtualNotchChanged: (() -> Void)?
+
+    func setVirtualNotch(screenName: String, enabled: Bool) {
+        if enabled {
+            virtualNotchScreenNames.insert(screenName)
+        } else {
+            virtualNotchScreenNames.remove(screenName)
+        }
+        onVirtualNotchChanged?()
+    }
+
     // MARK: - Global shortcuts
 
     /// Hotkey bindings keyed by `HotKeyAction` raw value. Empty by default:
@@ -157,6 +180,7 @@ final class SettingsStore {
         static let featureOverrides = "settings.featureOverrides"
         static let hotKeys = "settings.hotKeyBindings"
         static let onboarding = "settings.onboardingCompleted"
+        static let virtualNotch = "settings.virtualNotchScreens"
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -185,5 +209,7 @@ final class SettingsStore {
                 .flatMap { try? JSONDecoder().decode([String: KeyCombo].self, from: $0) }
             ?? [:]
         hasCompletedOnboarding = defaults.bool(forKey: Keys.onboarding)
+        virtualNotchScreenNames =
+            Set(defaults.stringArray(forKey: Keys.virtualNotch) ?? [])
     }
 }

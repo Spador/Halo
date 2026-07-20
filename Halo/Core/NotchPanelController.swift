@@ -18,6 +18,10 @@ final class NotchPanelController: NSObject {
     private let viewModel = NotchViewModel()
     private let shelf: ShelfViewModel
     private let settings: SettingsStore
+    /// Which screen this controller's island lives on. The main island
+    /// follows the notched screen; virtual notches pin to one external
+    /// display and go away when it does.
+    private let resolveScreen: () -> NSScreen?
     private var geometry: NotchGeometry
     private var collapseTask: Task<Void, Never>?
     private var expandTask: Task<Void, Never>?
@@ -48,12 +52,14 @@ final class NotchPanelController: NSObject {
         calendar: CalendarService,
         quickTimer: QuickTimerEngine,
         pomodoro: PomodoroEngine,
-        settings: SettingsStore = .shared
+        settings: SettingsStore = .shared,
+        resolveScreen: @escaping () -> NSScreen? = { NotchGeometry.preferredScreen() }
     ) {
         geometry = NotchGeometry(screen: screen)
         panel = NotchPanel(contentRect: geometry.notchRect)
         self.shelf = shelf
         self.settings = settings
+        self.resolveScreen = resolveScreen
         super.init()
 
         viewModel.notchSize = geometry.notchRect.size
@@ -129,6 +135,16 @@ final class NotchPanelController: NSObject {
         // orderFrontRegardless: show the panel even though the app never
         // becomes the active application.
         panel.orderFrontRegardless()
+    }
+
+    /// Takes the island off screen for good (virtual notch toggled off or
+    /// its display unplugged).
+    func close() {
+        collapseTask?.cancel()
+        expandTask?.cancel()
+        shrinkTask?.cancel()
+        hudHideTask?.cancel()
+        panel.orderOut(nil)
     }
 
     // MARK: - Global shortcut entry points
@@ -292,7 +308,12 @@ final class NotchPanelController: NSObject {
     /// Recomputes position when displays are plugged in/out, resolution
     /// changes, or the notched screen disappears (e.g. lid closed).
     @objc private func screenParametersDidChange() {
-        guard let screen = NotchGeometry.preferredScreen() else { return }
+        guard let screen = resolveScreen() else {
+            // This controller's display is gone; hide until the
+            // composition root tears us down or it returns.
+            panel.orderOut(nil)
+            return
+        }
         geometry = NotchGeometry(screen: screen)
         viewModel.notchSize = geometry.notchRect.size
         viewModel.isExpanded = false
